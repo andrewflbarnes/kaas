@@ -3,9 +3,7 @@
  */
 package net.aflb.kaas.core.legacy.races;
 
-//import android.content.Context;
-//import android.widget.Toast;
-
+import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.legacy.export.PdfMatchSerializer;
 import net.aflb.kaas.core.model.competing.Round;
 
@@ -30,15 +28,13 @@ import net.aflb.kaas.core.model.competing.Round;
  * @author Barnesly
  *
  */
+@Slf4j
 public class RaceConfigurer {
 
-	// FIXME
 	/**
 	 * Generates the races for the required set under the control id and league
 	 * in the {@link Round} parameter.
 	 *
-//	 * @param context
-//	 *            The context which DAO related activities will use.
 	 * @param control
 	 *            The {@link Round} containing the league and control id
 	 *            for race generation is required.
@@ -50,7 +46,7 @@ public class RaceConfigurer {
 		switch (raceSet){
 		case 1:
 			// FIXME .execute()
-    		new RaceConfigurerSetOne(new PdfMatchSerializer(), control).doInBackground();
+    		new RaceConfigurerSetOne(control).doInBackground();
 			break;
 		case 2:
 		case 3:

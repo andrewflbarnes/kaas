@@ -7,18 +7,22 @@ import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetOne
 import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
 import net.aflb.kaas.core.legacy.races.group.RaceGroup;
 import net.aflb.kaas.core.model.Club;
+import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.model.Team;
-import net.aflb.kaas.core.legacy.export.MatchSerializer;
+import net.aflb.kaas.core.model.competing.Seeding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -51,21 +55,11 @@ import java.util.Map;
  * @author Barnesly
  */
 @Slf4j
-class RaceConfigurerSetOne /* extends AsyncTask<Void, String, Boolean> */ {
+class RaceConfigurerSetOne {
     private static final int THIS_ROUND_NO = 1;
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.UK);
 
-    private Round control;
-//    private Context context;
-    private MatchSerializer writer;
-//    private DaoFactory daoFactory;
-
-    /**
-     * Empty constructor for instantiation.
-     */
-    public RaceConfigurerSetOne() {
-        // Blank constructor
-    }
+    private final Round control;
 
     /**
      * Parameterised constructor for instantiation.
@@ -73,41 +67,9 @@ class RaceConfigurerSetOne /* extends AsyncTask<Void, String, Boolean> */ {
      * @param control
      *            the {@link Round} to configure the races for
      */
-    public RaceConfigurerSetOne(MatchSerializer writer, Round control) {
+    public RaceConfigurerSetOne(Round control) {
         this.control = control;
-//        this.context = context;
-        this.writer = writer;
-//        this.daoFactory = KingsDaoHelper.getDaoFactoryInstance(context);
     }
-
-//    /**
-//     * @return the {@link Context} associated with this task
-//     */
-//    public Context getContext() {
-//        return context;
-//    }
-//
-//    /**
-//     * @param context
-//     *            the {@link Context} to associated with this task
-//     */
-//    public void setContext(Context context) {
-//        this.context = context;
-//    }
-//
-//    /**
-//     * @return the {@link RaceListWriter} which writes races out to file
-//     */
-//    public RaceListWriter getWriter() {
-//        return writer;
-//    }
-//
-//    /**
-//     * @param writer the {@link RaceListWriter} instance which writes races out to file
-//     */
-//    public void setWriter(RaceListWriter writer) {
-//        this.writer = writer;
-//    }
 
     /**
      * @return the {@link Round} which configuration will be created for
@@ -116,55 +78,34 @@ class RaceConfigurerSetOne /* extends AsyncTask<Void, String, Boolean> */ {
         return control;
     }
 
-    /**
-     * @param control
-     *            the {@link Round} object for which configuration will be
-     *            created for
-     */
-    public void setControl(Round control) {
-        this.control = control;
-    }
-
     // FIXME
-    /*
-     * (non-Javadoc)
-     *
-     * @see android.os.AsyncTask#doInBackground(java.lang.Object[])
-     */
-//    @Override
-    protected Boolean doInBackground(Void... params) {
-//        ClubDao clubDatasource = daoFactory.newClubDaoInstance();
-//        clubDatasource.open();
+    public boolean doInBackground() {
 
         String league = this.control.league().name();
 //        List<Club> allClubs = clubDatasource.getClubs(league);
 //        clubDatasource.close();
 
-        // Get the list of seeded teams
-//        TeamDao teamDatasource = daoFactory.newTeamDaoInstance();
-//        teamDatasource.open();
-
-        // Retrieve the competing teams for this league and division and sort them
-        List<Team> competingTeams;
+        // Retrieve the competing seeds for this league and division and sort them
+        final Map<Division, List<Team>> competingTeams = control.seeds().stream().collect(Collectors.groupingBy(
+                Seeding::division,
+                Collectors.mapping(Seeding::team, Collectors.toList())));
 
         // Create the race groups and races for each division
         List<Map<String, RaceGroup>> allRaceGroups = new ArrayList<>(3);
-//        try {
-//            for (String division : Division.ALL_DIVISIONS) {
-//                competingTeams = teamDatasource.getCompetingTeams(division, allClubs, league);
-//
-//                log.debug(LOG_TAG, division + " teams competing:");
-//                Collections.sort(competingTeams);
-//                for (int i = 0, n = competingTeams.size(); i < n; i++) {
-//                    log.debug(LOG_TAG, competingTeams.get(i).toString());
-//                }
-//
-//                allRaceGroups.add(generateRaceGroupMap(competingTeams));
-//            }
-//        } catch (InvalidNumberOfTeamsException e) {
-//            publishProgress(e.getMessage());
-//            return Boolean.FALSE;
-//        }
+        for (Map.Entry<Division, List<Team>> kv : competingTeams.entrySet()) {
+            final Division division = kv.getKey();
+            final List<Team> teams = kv.getValue();
+            Collections.sort(teams);
+            teams.forEach(team -> log.debug("{}", team));
+            // FIXME - holdover from android, we should propagate the exception
+            try {
+                allRaceGroups.add(generateRaceGroupMap(teams));
+                teams.forEach(t -> log.debug("{}", t.name()));
+            } catch (InvalidNumberOfTeamsException e) {
+                log.error("Unable to generate races", e);
+                return false;
+            }
+        }
 
         // Create a single list of races in the order they will be run
         //TODO Comments!
@@ -184,22 +125,7 @@ class RaceConfigurerSetOne /* extends AsyncTask<Void, String, Boolean> */ {
             }
         }
 
-        // Commit these to the database
-//        RaceDao raceDatasource = daoFactory.newRaceDaoInstance();
-//        raceDatasource.open();
-
-        // Begin the transaction to the database
-//        raceDatasource.beginTransactionNonExclusive();
-
-        // Add the new races
-//        for (int i = 0, n = allRaces.size(); i < n; i++) {
-//            raceDatasource.addRace(allRaces.get(i));
-//        }
-//
-//        // Mark the transaction to the database as successful and end it
-//        raceDatasource.setTransactionSuccessful();
-//        raceDatasource.endTransaction();
-
+        // TODO relocate this somewhere meaningful
         // Check that the public external storage is writable
 //        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 //            final String PDF_FILE_NAME = "%s_kings_races_set_1.pdf";
@@ -218,37 +144,8 @@ class RaceConfigurerSetOne /* extends AsyncTask<Void, String, Boolean> */ {
 //            log.error(LOG_TAG, "External media is not in a writable state");
 //            publishProgress("Unable to create PDF!");
 //        }
-//
-//        raceDatasource.close();
-//        teamDatasource.close();
 
-        return Boolean.TRUE;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see android.os.AsyncTask#onProgressUpdate(java.lang.Object[])
-     */
-//    @Override
-    protected void onProgressUpdate(String... messages) {
-//        Toast.makeText(getContext(), messages[0], Toast.LENGTH_LONG).show();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
-     */
-//    @Override
-    protected void onPostExecute(Boolean success) {
-        if (success) {
-//            Toast.makeText(getContext(), "Race configuration completed",
-//                    Toast.LENGTH_LONG).show();
-        } else {
-//            Toast.makeText(getContext(), "Race configuration failed! FUCK",
-//                    Toast.LENGTH_LONG).show();
-        }
+        return true;
     }
 
     /**

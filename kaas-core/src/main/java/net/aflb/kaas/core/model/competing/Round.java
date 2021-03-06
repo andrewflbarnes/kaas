@@ -17,7 +17,7 @@ public record Round(
         String name,
         Division division,
         League league,
-        Set<Seeding> teams,
+        Set<Seeding> seeds,
         /**
          * When {@code true} then this contains no matches itself but other {@link #subRounds()},
          * when {@code false} then this contains {@link #matches()} to be run
