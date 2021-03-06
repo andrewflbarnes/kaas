@@ -1,7 +1,7 @@
 package net.aflb.kaas.core.legacy.export;
 
 import lombok.extern.slf4j.Slf4j;
-import net.aflb.kaas.core.model.Match;
+import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.Team;
 
 //import crl.android.pdfwriter.PDFWriter;

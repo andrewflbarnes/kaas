@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import net.aflb.kaas.core.model.Match;
+import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.Team;
 
 // TODO Move the important methods of this out to an interface

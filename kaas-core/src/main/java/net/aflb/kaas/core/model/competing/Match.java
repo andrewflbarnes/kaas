@@ -1,9 +1,8 @@
-package net.aflb.kaas.core.model;
+package net.aflb.kaas.core.model.competing;
 
-import lombok.Builder;
 import lombok.Data;
+import net.aflb.kaas.core.model.Team;
 
-@Builder
 @Data
 public class Match implements Comparable<Match> {
     public enum Winner {
@@ -15,9 +14,12 @@ public class Match implements Comparable<Match> {
     private final Team teamTwo;
     private Team winner;
 
-    @Override
-    public int compareTo(Match o) {
-        return (int)(id - o.id);
+    public static Match of(final Team teamOne, final Team teamTwo) {
+        return new Match(
+                // FIXME
+                System.currentTimeMillis(),
+                teamOne,
+                teamTwo);
     }
 
     public void setWinner(final Winner winner) {
@@ -25,5 +27,10 @@ public class Match implements Comparable<Match> {
             case ONE -> teamOne;
             case TWO -> teamTwo;
         };
+    }
+
+    @Override
+    public int compareTo(Match o) {
+        return (int)(id - o.id);
     }
 }

@@ -1,7 +1,7 @@
 package net.aflb.kaas.core.legacy.races.engine;
 
-import net.aflb.kaas.core.model.Match;
-import net.aflb.kaas.core.model.Round;
+import net.aflb.kaas.core.model.competing.Match;
+import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.model.Team;
 
 import java.util.List;

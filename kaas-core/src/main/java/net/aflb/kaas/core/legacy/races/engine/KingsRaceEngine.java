@@ -8,8 +8,8 @@ import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetTwo
 import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
 import net.aflb.kaas.core.legacy.races.group.RaceGroup;
 import net.aflb.kaas.core.model.Club;
-import net.aflb.kaas.core.model.Match;
-import net.aflb.kaas.core.model.Round;
+import net.aflb.kaas.core.model.competing.Match;
+import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.model.Team;
 
 import java.util.ArrayList;

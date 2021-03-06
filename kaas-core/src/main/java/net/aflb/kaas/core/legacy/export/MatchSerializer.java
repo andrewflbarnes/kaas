@@ -1,6 +1,6 @@
 package net.aflb.kaas.core.legacy.export;
 
-import net.aflb.kaas.core.model.Match;
+import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.Team;
 
 import java.util.List;

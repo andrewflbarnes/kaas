@@ -7,7 +7,7 @@ package net.aflb.kaas.core.legacy.races;
 //import android.widget.Toast;
 
 import net.aflb.kaas.core.legacy.export.PdfMatchSerializer;
-import net.aflb.kaas.core.model.Round;
+import net.aflb.kaas.core.model.competing.Round;
 
 /**
  * <p>
@@ -40,12 +40,12 @@ public class RaceConfigurer {
 //	 * @param context
 //	 *            The context which DAO related activities will use.
 	 * @param control
-	 *            The {@link RaceControl} containing the league and control id
+	 *            The {@link Round} containing the league and control id
 	 *            for race generation is required.
 	 * @param raceSet
 	 *            Which set of races need to be generated.
 	 */
-	public static void generateRaces(/* final Context context , */final Round control, final int raceSet, boolean isKnockouts) {
+	public static void generateRaces(final Round control, final int raceSet, boolean isKnockouts) {
 //		Toast.makeText(context, "Generating set " + String.valueOf(raceSet) + " races...", Toast.LENGTH_SHORT).show();
 		switch (raceSet){
 		case 1:
