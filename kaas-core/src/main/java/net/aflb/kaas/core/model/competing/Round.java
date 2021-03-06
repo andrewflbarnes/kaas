@@ -4,10 +4,12 @@ import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.League;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public record Round(
         long id,
@@ -40,5 +42,28 @@ public record Round(
                 virtual ? Collections.emptyList() : null,
                 virtual ? null : Collections.emptyList(),
                 virtual ? null : Collections.emptyList());
+    }
+
+    public List<Match> matches() {
+        if (virtual) {
+            return subRounds.stream()
+                    .map(Round::matches)
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+        } else {
+            return matches;
+        }
+    }
+
+    public List<Match> matches(final Comparator<Match> comparator) {
+        if (virtual) {
+            return subRounds.stream()
+                    .map(Round::matches)
+                    .flatMap(List::stream)
+                    .sorted(comparator)
+                    .collect(Collectors.toList());
+        } else {
+            return matches;
+        }
     }
 }
