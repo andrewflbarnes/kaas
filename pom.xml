@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.aflb.kaas</groupId>
+    <artifactId>kaas-parent</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <description>The parent project for KAAS</description>
+
+    <scm>
+        <connection>git://git@github.com/andrewflbarnes/kaas.git</connection>
+        <developerConnection>git://git@github.com/andrewflbarnes/kaas.git</developerConnection>
+        <url>https://github.com/andrewflbarnes/kaas</url>
+        <tag>${project.version}</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Andrew Barnes</name>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>kaas-core</module>
+        <module>kaas-engine</module>
+    </modules>
+
+    <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
+
+        <java.version>1.15</java.version>
+        <maven.compiler.source>1.15</maven.compiler.source>
+        <maven.compiler.target>1.15</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.aflb.kaas.core</groupId>
+                <artifactId>kaas-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
