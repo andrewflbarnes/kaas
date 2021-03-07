@@ -8,21 +8,15 @@ import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
 import net.aflb.kaas.core.legacy.races.group.RaceGroup;
 import net.aflb.kaas.core.model.Club;
 import net.aflb.kaas.core.model.Division;
-import net.aflb.kaas.core.model.competing.Match;
-import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.model.Team;
-import net.aflb.kaas.core.model.competing.Seeding;
+import net.aflb.kaas.core.model.competing.Match;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -57,38 +51,9 @@ import java.util.stream.Collectors;
 @Slf4j
 class RaceConfigurerSetOne {
     private static final int THIS_ROUND_NO = 1;
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.UK);
-
-    private final Round control;
-
-    /**
-     * Parameterised constructor for instantiation.
-     *
-     * @param control
-     *            the {@link Round} to configure the races for
-     */
-    public RaceConfigurerSetOne(Round control) {
-        this.control = control;
-    }
-
-    /**
-     * @return the {@link Round} which configuration will be created for
-     */
-    public Round getControl() {
-        return control;
-    }
 
     // FIXME
-    public boolean doInBackground() {
-
-        String league = this.control.league().name();
-//        List<Club> allClubs = clubDatasource.getClubs(league);
-//        clubDatasource.close();
-
-        // Retrieve the competing seeds for this league and division and sort them
-        final Map<Division, List<Team>> competingTeams = control.seeds().stream().collect(Collectors.groupingBy(
-                Seeding::division,
-                Collectors.mapping(Seeding::team, Collectors.toList())));
+    public List<Match> execute(final Map<Division, List<Team>> competingTeams) {
 
         // Create the race groups and races for each division
         List<Map<String, RaceGroup>> allRaceGroups = new ArrayList<>(3);
@@ -96,6 +61,7 @@ class RaceConfigurerSetOne {
             final Division division = kv.getKey();
             final List<Team> teams = kv.getValue();
             Collections.sort(teams);
+            log.debug("{} competing seeds", division);
             teams.forEach(team -> log.debug("{}", team));
             // FIXME - holdover from android, we should propagate the exception
             try {
@@ -103,20 +69,22 @@ class RaceConfigurerSetOne {
                 teams.forEach(t -> log.debug("{}", t.name()));
             } catch (InvalidNumberOfTeamsException e) {
                 log.error("Unable to generate races", e);
-                return false;
+                return null;
             }
         }
 
         // Create a single list of races in the order they will be run
         //TODO Comments!
-        List<Match> allRaces = new ArrayList<>();
+        final List<Match> allRaces = new ArrayList<>();
         Collection<RaceGroup> groups;
-        List<Match> theseRaces;
         for (int i = 0; i < 3; i++) {
+            log.debug("i {}", i);
             for (int j = 0, n = allRaceGroups.size(); j < n; j++) {
+                log.debug("j {} n {}", j, n);
                 groups = allRaceGroups.get(j).values();
                 for (RaceGroup group : groups) {
-                    theseRaces = group.getRaces(i);
+                    var theseRaces = group.getRaces(i);
+                    log.debug("{}: {}", group, theseRaces);
                     for (int k = 0, m = theseRaces.size(); k < m; k++) {
                         allRaces.add(theseRaces.get(k));
                         log.debug("SIZE: " + theseRaces.size());
@@ -145,7 +113,7 @@ class RaceConfigurerSetOne {
 //            publishProgress("Unable to create PDF!");
 //        }
 
-        return true;
+        return allRaces;
     }
 
     /**
@@ -217,7 +185,7 @@ class RaceConfigurerSetOne {
         for (int i = 0, n = groupNames.length; i < n; i++) {
             log.debug("creating race group " + groupNames[i]);
 
-            RaceGroup group = new RaceGroup(groupNames[i], new ArrayList<Team>(), groupGrid[i], this.control.id(), THIS_ROUND_NO);
+            RaceGroup group = new RaceGroup(groupNames[i], new ArrayList<>(), groupGrid[i], 0 /* this.control.id() */, THIS_ROUND_NO);
             raceGroups.put(groupNames[i], group);
         }
 

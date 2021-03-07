@@ -630,15 +630,16 @@ public class RaceGroup {
 	 * @return The {@link RaceGroup} equivalent of the {@link Match}es
 	 */
 	public static List<RaceGroup> racesToList(final List<Match> races, final List<Team> teams) {
-		List<RaceGroup> raceGroups = new ArrayList<RaceGroup>();
+		List<RaceGroup> raceGroups = new ArrayList<>();
 
 		// Check that the list of races is not null or empty
 		if (races == null || races.size() == 0) {
 			return raceGroups;
 		}
 
+		// TODO
 		// Sort the list of races passed in, this will order them by group
-		Collections.sort(races);
+//		Collections.sort(races);
 
 		// FIXME
 //		// Store the control id and round no for creating the race groups

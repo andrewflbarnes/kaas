@@ -1,25 +1,33 @@
 package net.aflb.kaas.core.model.competing;
 
 import lombok.Data;
+import net.aflb.kaas.core.KaasID;
 import net.aflb.kaas.core.model.Team;
 
+import java.util.function.Supplier;
+
 @Data
-public class Match implements Comparable<Match> {
+public class Match {
+
+    private static final Supplier<KaasID> GEN = KaasID.generator(Match.class);
     public enum Winner {
         ONE, TWO;
     }
 
-    private final long id;
+    private final KaasID kassId;
     private final Team teamOne;
     private final Team teamTwo;
     private Team winner;
 
     public static Match of(final Team teamOne, final Team teamTwo) {
         return new Match(
-                // FIXME
-                System.currentTimeMillis(),
+                GEN.get(),
                 teamOne,
                 teamTwo);
+    }
+
+    public long getId() {
+        return kassId.hashCode();
     }
 
     public void setWinner(final Winner winner) {
@@ -27,10 +35,5 @@ public class Match implements Comparable<Match> {
             case ONE -> teamOne;
             case TWO -> teamTwo;
         };
-    }
-
-    @Override
-    public int compareTo(Match o) {
-        return (int)(id - o.id);
     }
 }

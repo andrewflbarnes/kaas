@@ -46,7 +46,7 @@ public class RaceConfigurer {
 		switch (raceSet){
 		case 1:
 			// FIXME .execute()
-    		new RaceConfigurerSetOne(control).doInBackground();
+    		new RaceConfigurerSetOne().execute(control.seeds());
 			break;
 		case 2:
 		case 3:

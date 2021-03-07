@@ -144,7 +144,7 @@ public class GroupConfiguration {
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < raceGrid[i].length; j++) {
-//				Match race = new Match();
+				Match race = Match.of(teams.get(raceGrid[i][j][0] - 1),teams.get(raceGrid[i][j][1] - 1));
 //				race.setControlId(controlId);
 //				race.setDivision(division);
 //				race.setGroup(group);
@@ -153,14 +153,14 @@ public class GroupConfiguration {
 //				// take 1 off when determining which listed team is competing
 //				race.setTeamOne(teams.get(raceGrid[i][j][0] - 1).getTeamId());
 //				race.setTeamTwo(teams.get(raceGrid[i][j][1] - 1).getTeamId());
-//
-//				races.add(race);
 
-//				log.debug(
-//						"race added for control id " + controlId
-//								+ ", division " + division + ", round number "
-//								+ roundNo + ", teams " + race.getTeamOne()
-//								+ " " + race.getTeamTwo());
+				races.add(race);
+
+				log.debug(
+						"race added for control id " + controlId
+								+ ", division " + "{division}" + ", round number "
+								+ roundNo + ", teams " + race.getTeamOne()
+								+ " " + race.getTeamTwo());
 			}
 		}
 
