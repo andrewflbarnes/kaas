@@ -6,6 +6,7 @@ package net.aflb.kaas.core.legacy.races;
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.legacy.export.PdfMatchSerializer;
 import net.aflb.kaas.core.model.competing.Round;
+import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
 
 /**
  * <p>
@@ -45,8 +46,8 @@ public class RaceConfigurer {
 //		Toast.makeText(context, "Generating set " + String.valueOf(raceSet) + " races...", Toast.LENGTH_SHORT).show();
 		switch (raceSet){
 		case 1:
-			// FIXME .execute()
-    		new RaceConfigurerSetOne().execute(control.seeds());
+			// TODO add the returned matches to right place in the round
+    		new SetOneMatchGenerator().generate(control.seeds());
 			break;
 		case 2:
 		case 3:

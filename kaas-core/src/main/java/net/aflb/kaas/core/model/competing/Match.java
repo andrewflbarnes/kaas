@@ -4,10 +4,11 @@ import lombok.Data;
 import net.aflb.kaas.core.KaasID;
 import net.aflb.kaas.core.model.Team;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 @Data
-public class Match {
+public class Match<T> {
 
     private static final Supplier<KaasID> GEN = KaasID.generator(Match.class);
     public enum Winner {
@@ -17,7 +18,10 @@ public class Match {
     private final KaasID kassId;
     private final Team teamOne;
     private final Team teamTwo;
-    private Team winner;
+    private String teamOneDsq = null;
+    private String teamTwoDsq = null;
+    private Team winner = null;
+    private T meta = null;
 
     public static Match of(final Team teamOne, final Team teamTwo) {
         return new Match(

@@ -1,6 +1,7 @@
-package net.aflb.kaas.core.legacy.races;
+package net.aflb.kaas.kings.engine;
 
 import lombok.extern.slf4j.Slf4j;
+import net.aflb.kaas.core.legacy.races.RaceConfigurer;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration.InvalidNumberOfTeamsException;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetOne;
@@ -10,6 +11,7 @@ import net.aflb.kaas.core.model.Club;
 import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
+import net.aflb.kaas.core.spi.MatchGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,11 +51,10 @@ import java.util.Map;
  * @author Barnesly
  */
 @Slf4j
-class RaceConfigurerSetOne {
+public class SetOneMatchGenerator implements MatchGenerator {
     private static final int THIS_ROUND_NO = 1;
 
-    // FIXME
-    public List<Match> execute(final Map<Division, List<Team>> competingTeams) {
+    public List<Match> generate(final Map<Division, List<Team>> competingTeams) {
 
         // Create the race groups and races for each division
         List<Map<String, RaceGroup>> allRaceGroups = new ArrayList<>(3);
@@ -61,12 +62,11 @@ class RaceConfigurerSetOne {
             final Division division = kv.getKey();
             final List<Team> teams = kv.getValue();
             Collections.sort(teams);
-            log.debug("{} competing seeds", division);
-            teams.forEach(team -> log.debug("{}", team));
+            log.debug("{} competing seeds", division.name());
+            teams.forEach(team -> log.debug("{}", team.name()));
             // FIXME - holdover from android, we should propagate the exception
             try {
                 allRaceGroups.add(generateRaceGroupMap(teams));
-                teams.forEach(t -> log.debug("{}", t.name()));
             } catch (InvalidNumberOfTeamsException e) {
                 log.error("Unable to generate races", e);
                 return null;
@@ -78,16 +78,12 @@ class RaceConfigurerSetOne {
         final List<Match> allRaces = new ArrayList<>();
         Collection<RaceGroup> groups;
         for (int i = 0; i < 3; i++) {
-            log.debug("i {}", i);
             for (int j = 0, n = allRaceGroups.size(); j < n; j++) {
-                log.debug("j {} n {}", j, n);
                 groups = allRaceGroups.get(j).values();
                 for (RaceGroup group : groups) {
                     var theseRaces = group.getRaces(i);
-                    log.debug("{}: {}", group, theseRaces);
                     for (int k = 0, m = theseRaces.size(); k < m; k++) {
                         allRaces.add(theseRaces.get(k));
-                        log.debug("SIZE: " + theseRaces.size());
                     }
                 }
             }
@@ -185,7 +181,7 @@ class RaceConfigurerSetOne {
         for (int i = 0, n = groupNames.length; i < n; i++) {
             log.debug("creating race group " + groupNames[i]);
 
-            RaceGroup group = new RaceGroup(groupNames[i], new ArrayList<>(), groupGrid[i], 0 /* this.control.id() */, THIS_ROUND_NO);
+            RaceGroup group = new RaceGroup(groupNames[i], new ArrayList<>(), groupGrid[i], 999 /* this.control.id() */, THIS_ROUND_NO);
             raceGroups.put(groupNames[i], group);
         }
 

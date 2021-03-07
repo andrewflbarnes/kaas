@@ -139,7 +139,7 @@ public class GroupConfiguration {
 	 */
 	public List<Match> createRaces(long controlId, long roundNo, String group,
 			List<Team> teams) {
-		List<Match> races = new ArrayList<Match>();
+		List<Match> races = new ArrayList<>();
 //		String division = teams.get(0).getDivision();
 
 		for (int i = 0; i < 3; i++) {
@@ -159,8 +159,8 @@ public class GroupConfiguration {
 				log.debug(
 						"race added for control id " + controlId
 								+ ", division " + "{division}" + ", round number "
-								+ roundNo + ", teams " + race.getTeamOne()
-								+ " " + race.getTeamTwo());
+								+ roundNo + ", teams " + race.getTeamOne().name()
+								+ " " + race.getTeamTwo().name());
 			}
 		}
 

@@ -6,6 +6,7 @@ import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.League;
 import net.aflb.kaas.core.model.Registry;
 import net.aflb.kaas.core.model.Team;
+import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-class RaceConfigurerSetOneTest {
+class SetOneMatchGeneratorTest {
 
     @Test
     void test() {
@@ -90,11 +91,9 @@ class RaceConfigurerSetOneTest {
 
         final var seeds = registry.getSeeds(Comparator.comparingInt(seeding::get));
         final var leagueSeeds = seeds.get(league);
-        leagueSeeds.forEach((d, ts) -> ts.forEach(t ->
-                log.debug("{} : {}", d.name(), t.name())));
-        var result = new RaceConfigurerSetOne().execute(leagueSeeds);
+        var result = new SetOneMatchGenerator().generate(leagueSeeds);
 
-        result.forEach(m -> log.info("{} v {}", m.getTeamOne(), m.getTeamTwo()));
+        result.forEach(m -> log.info("{} v {}", m.getTeamOne().name(), m.getTeamTwo().name()));
     }
 
 }

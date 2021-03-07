@@ -1,14 +1,18 @@
 package net.aflb.kaas.core.model;
 
+import net.aflb.kaas.core.KaasID;
+
 import java.util.Locale;
+import java.util.function.Supplier;
 
 public record Team(
-        long id,
+        KaasID id,
         String name
 ) implements Comparable<Team> {
+    private static final Supplier<KaasID> GEN = KaasID.generator(Team.class);
+
     public static Team of(final String name) {
-        // FIXME
-        return new Team(System.currentTimeMillis(), name);
+        return new Team(GEN.get(), name);
     }
 
     @Override

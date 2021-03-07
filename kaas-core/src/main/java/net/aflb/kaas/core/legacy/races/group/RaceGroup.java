@@ -6,7 +6,10 @@ import net.aflb.kaas.core.model.Team;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * This class is equivalent to the Tables configuration in the excel cheat sheet
@@ -231,67 +234,37 @@ public class RaceGroup {
 	 */
 	public List<Team> getTeamWinsAndDsqs() {
 		List<Team> teamWinsAndDsqs = new ArrayList<Team>();
-		int oldScore;
 
-//		SparseArray<Team> allTeams = new SparseArray<Team>(this.teams.size());
-//		Team objTeam;
-//		for (int i = 0, n = teams.size(); i < n; i++) {
-//			objTeam = teams.get(i);
-//			allTeams.put(objTeam.getTeamId(), objTeam);
-//		}
-//
-//		// TODO Do we need these SparseIntArrays? I suspect not
-//		// Get a list of unique teams competing
-//		SparseIntArray teamWins = new SparseIntArray(6);
-//		SparseIntArray teamDsqs = new SparseIntArray(6);
-//		int team;
-//		Race race;
-//
-//		for (int i = 0, n = this.matches.size(); i < n; i++) {
-//
-//			race = this.matches.get(i);
-//
-//			team = race.getTeamOne();
-//			for (int j = 1; j <= 2; j++) {
-//				if (j == 2) {
-//					team = race.getTeamTwo();
-//				}
-//
-//				// Ensure that the team is added (in the case of no wins)
-//				if (teamWins.get(team, TEAM_NOT_FOUND) == TEAM_NOT_FOUND) {
-//					teamWins.put(team, 0);
-//				}
-//				if (teamDsqs.get(team, TEAM_NOT_FOUND) == TEAM_NOT_FOUND) {
-//					teamDsqs.put(team, 0);
-//				}
-//
-//				// Update the wins if appropriate
-//				if (race.getTeamWin() == j) {
-//					oldScore = teamWins.get(team);
-//					teamWins.put(team, oldScore + 1);
-//				}
-//			}
-//
-//			// Update the DSQs if appropriate
-//			if (race.getTeamOneDSQ() != null && !race.getTeamOneDSQ().isEmpty()) {
-//				oldScore = teamDsqs.get(team);
-//				teamDsqs.put(team, oldScore + 1);
-//			}
-//			if (race.getTeamTwoDSQ() != null && !race.getTeamTwoDSQ().isEmpty()) {
-//				oldScore = teamDsqs.get(team);
-//				teamDsqs.put(team, oldScore + 1);
-//			}
-//
-//		}
-//
-//		int key;
-//		for (int i = 0, n = teamWins.size(); i < n; i++) {
-//			key = teamWins.keyAt(i);
-//			objTeam = allTeams.get(key);
-//			objTeam.setSetOneWins(teamWins.get(key));
-//			objTeam.setSetOneDsqs(teamDsqs.get(key));
-//			teamWinsAndDsqs.add(objTeam);
-//		}
+		// TODO Do we need these SparseIntArrays? I suspect not
+		// Get a list of unique teams competing
+		Map<Team, Integer> teamWins = new HashMap<>(6);
+		Map<Team, Integer> teamDsqs = new HashMap<>(6);
+
+		matches.forEach(race -> {
+			Stream.of(race.getTeamTwo(), race.getTeamTwo()).forEach(t -> {
+				// Update the wins if appropriate
+				if (t.equals(race.getWinner())) {
+					teamWins.compute(t, (k, score) -> score == null ? 0 : score + 1);
+				}
+				teamDsqs.computeIfAbsent(t, k -> 0);
+			});
+
+			// Update the DSQs if appropriate
+			if (race.getTeamOneDsq() != null && !race.getTeamOneDsq().isEmpty()) {
+				teamWins.computeIfPresent(race.getTeamOne(), (t, score) -> score + 1);
+			}
+			if (race.getTeamTwoDsq() != null && !race.getTeamTwoDsq().isEmpty()) {
+				teamWins.computeIfPresent(race.getTeamOne(), (t, score) -> score + 1);
+			}
+
+		});
+
+		// TODO
+		teams.stream().forEach(t -> {
+//			t.setSetOneWins(teamWins.get(t));
+//			t.setSetOneDsqs(teamDsqs.get(t));
+//			teamWinsAndDsqs.add(t);
+		});
 
 		return teamWinsAndDsqs;
 	}
@@ -463,8 +436,8 @@ public class RaceGroup {
 	 *             completed
 	 */
 	private int whoWon(Team teamOne, Team teamTwo) throws RaceNotRunException {
-		long teamOneId = teamOne.id();
-		long teamTwoId = teamTwo.id();
+		final var teamOneId = teamOne.id();
+		final var teamTwoId = teamTwo.id();
 		// We keep track of the return value as in some cases teams can race
 		// each other multiple times in a single set
 		int retval = 0;
