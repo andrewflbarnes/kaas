@@ -47,7 +47,7 @@ public class RaceConfigurer {
 		switch (raceSet){
 		case 1:
 			// TODO add the returned matches to right place in the round
-    		new SetOneMatchGenerator().generate(control.seeds());
+    		new SetOneMatchGenerator().generate(control);
 			break;
 		case 2:
 		case 3:

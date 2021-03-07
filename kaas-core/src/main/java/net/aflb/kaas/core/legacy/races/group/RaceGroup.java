@@ -205,25 +205,27 @@ public class RaceGroup {
 	 */
 	// TODO interface annotation making use of private static final ints (for compile time checking)
 	public List<Match> getRaces(int section) {
-		List<Match> sectionRaces = new ArrayList<Match>();
-
-		if (this.matches != null && this.matches.size() > 0 && section < 3) {
-			int raceIdx = 0;
-			switch (section) {
-			case 2:
-				raceIdx += this.configuration.getRaceGrid()[1].length;
-			case 1:
-				raceIdx += this.configuration.getRaceGrid()[0].length;
-			default:
-			}
-
-			for (int i = 0; i < this.configuration.getRaceGrid()[section].length; i++) {
-				sectionRaces.add(this.matches.get(raceIdx));
-				raceIdx++;
-			}
-		}
-
-		return sectionRaces;
+		return this.matches;
+		// FIXME? Does it make sense to embed this idea down here it should we let the caller decide?
+//		List<Match> sectionRaces = new ArrayList<Match>();
+//
+//		if (this.matches != null && this.matches.size() > 0 && section < 3) {
+//			int raceIdx = 0;
+//			switch (section) {
+//			case 2:
+//				raceIdx += this.configuration.getRaceGrid()[1].length;
+//			case 1:
+//				raceIdx += this.configuration.getRaceGrid()[0].length;
+//			default:
+//			}
+//
+//			for (int i = 0; i < this.configuration.getRaceGrid()[section].length; i++) {
+//				sectionRaces.add(this.matches.get(raceIdx));
+//				raceIdx++;
+//			}
+//		}
+//
+//		return sectionRaces;
 	}
 
 	/**

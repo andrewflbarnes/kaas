@@ -11,6 +11,7 @@ import net.aflb.kaas.core.model.Club;
 import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
+import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.spi.MatchGenerator;
 
 import java.util.ArrayList;
@@ -54,7 +55,14 @@ import java.util.Map;
 public class SetOneMatchGenerator implements MatchGenerator {
     private static final int THIS_ROUND_NO = 1;
 
-    public List<Match> generate(final Map<Division, List<Team>> competingTeams) {
+    public List<Match<?>> generate(final Round round) {
+
+        final var competingTeams = round.seeds();
+        if (!round.virtual()) {
+            throw new IllegalStateException("Round for generation must be virtual");
+        }
+        final var set1 = Round.of(true, "set 1", round.seeds(), round.league());
+        round.subRounds().add(set1);
 
         // Create the race groups and races for each division
         List<Map<String, RaceGroup>> allRaceGroups = new ArrayList<>(3);
@@ -65,29 +73,52 @@ public class SetOneMatchGenerator implements MatchGenerator {
             log.debug("{} competing seeds", division.name());
             teams.forEach(team -> log.debug("{}", team.name()));
             // FIXME - holdover from android, we should propagate the exception
+            final Map<String, RaceGroup> raceGroupMap;
             try {
-                allRaceGroups.add(generateRaceGroupMap(teams));
+//                allRaceGroups.add(generateRaceGroupMap(teams));
+                raceGroupMap = generateRaceGroupMap(teams);
             } catch (InvalidNumberOfTeamsException e) {
                 log.error("Unable to generate races", e);
                 return null;
             }
+            final var setDivision = Round.of(true, division.name(), Collections.singletonMap(division, teams), round.league());
+            final var groups = raceGroupMap.values();
+            // TODO - we don't do the below anymore! This functionaltiy is disabled and we probably want to let the
+            //  caller manage it....
+            // We split every minileague into 3 sections...
+//            for (int i = 0; i < 3; i++) {
+//                for (RaceGroup group : groups) {
+//                    var theseRaces = group.getRaces(i);
+//                    set1Division.matches().addAll(theseRaces);
+//                }
+//            }
+            groups.forEach(g -> {
+                // -1 is not a real section as this value is currently ignored
+                final var setDivisionMinileague = Round.of(
+                        false, g.getGroupName(), Collections.singletonMap(division, g.getTeams()), round.league());
+                final var races = g.getRaces(-1);
+                setDivisionMinileague.matches().addAll(races);
+                setDivision.subRounds().add(setDivisionMinileague);
+            });
+            set1.subRounds().add(setDivision);
         }
 
         // Create a single list of races in the order they will be run
-        //TODO Comments!
-        final List<Match> allRaces = new ArrayList<>();
-        Collection<RaceGroup> groups;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0, n = allRaceGroups.size(); j < n; j++) {
-                groups = allRaceGroups.get(j).values();
-                for (RaceGroup group : groups) {
-                    var theseRaces = group.getRaces(i);
-                    for (int k = 0, m = theseRaces.size(); k < m; k++) {
-                        allRaces.add(theseRaces.get(k));
-                    }
-                }
-            }
-        }
+        // TODO Relocate this partitioning somewhere else and remove the fake partitioning (only occuring per division)
+        //  from above
+//        final List<Match<?>> allRaces = new ArrayList<>();
+//        Collection<RaceGroup> groups;
+//        for (int i = 0; i < 3; i++) {
+//            for (int j = 0, n = allRaceGroups.size(); j < n; j++) {
+//                groups = allRaceGroups.get(j).values();
+//                for (RaceGroup group : groups) {
+//                    var theseRaces = group.getRaces(i);
+//                    for (int k = 0, m = theseRaces.size(); k < m; k++) {
+//                        allRaces.add(theseRaces.get(k));
+//                    }
+//                }
+//            }
+//        }
 
         // TODO relocate this somewhere meaningful
         // Check that the public external storage is writable
@@ -109,7 +140,7 @@ public class SetOneMatchGenerator implements MatchGenerator {
 //            publishProgress("Unable to create PDF!");
 //        }
 
-        return allRaces;
+        return null;
     }
 
     /**

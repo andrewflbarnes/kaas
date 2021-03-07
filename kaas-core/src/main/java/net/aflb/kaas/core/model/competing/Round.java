@@ -4,6 +4,7 @@ import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.League;
 import net.aflb.kaas.core.model.Team;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -27,10 +28,7 @@ public record Round(
         List<Round> subRounds,
         List<Match> matches
 ) {
-
-    public Set<Division> divisions() {
-        return seeds.keySet();
-    }
+    private static final String DEBUG_PREFIX = ">";
 
     public static Round of(final boolean virtual, final String name, final Map<Division, List<Team>> seeds, final League league) {
         return new Round(
@@ -41,8 +39,12 @@ public record Round(
                 league,
                 seeds,
                 virtual,
-                virtual ? Collections.emptyList() : null,
-                virtual ? null : Collections.emptyList());
+                virtual ? new ArrayList<>() : null,
+                virtual ? null : new ArrayList<>());
+    }
+
+    public Set<Division> divisions() {
+        return seeds.keySet();
     }
 
     public List<Match> matches() {
@@ -66,5 +68,23 @@ public record Round(
         } else {
             return matches;
         }
+    }
+
+
+    public String debug() {
+        return debug(DEBUG_PREFIX);
+    }
+
+    protected String debug(final String prefix) {
+        var debugOutput = "\n%s %s".formatted(prefix, name);
+        if (this.virtual()) {
+            debugOutput += subRounds.stream().map(sr -> sr.debug(prefix + prefix.charAt(0)))
+                    .collect(Collectors.joining());
+        } else {
+            debugOutput += matches.stream().map(m -> "\n%s %s v %s".formatted(prefix, m.getTeamOne().name(), m.getTeamTwo().name()))
+                    .collect(Collectors.joining());
+        }
+
+        return debugOutput;
     }
 }

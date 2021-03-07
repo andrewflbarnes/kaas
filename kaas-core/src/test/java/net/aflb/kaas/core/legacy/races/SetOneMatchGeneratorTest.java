@@ -6,12 +6,16 @@ import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.League;
 import net.aflb.kaas.core.model.Registry;
 import net.aflb.kaas.core.model.Team;
+import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 class SetOneMatchGeneratorTest {
@@ -91,9 +95,29 @@ class SetOneMatchGeneratorTest {
 
         final var seeds = registry.getSeeds(Comparator.comparingInt(seeding::get));
         final var leagueSeeds = seeds.get(league);
-        var result = new SetOneMatchGenerator().generate(leagueSeeds);
+        final var round = Round.of(true, "round", leagueSeeds, league);
+        var result = new SetOneMatchGenerator().generate(round);
 
-        result.forEach(m -> log.info("{} v {}", m.getTeamOne().name(), m.getTeamTwo().name()));
+//        result.forEach(m -> log.info("{} v {}", m.getTeamOne().name(), m.getTeamTwo().name()));
+
+        log.info("{}", round.debug());
+//        print(round, ">");
+
+        // Assume the kings implementation for now
+        // so 2 divisions with 8 teams on round 1
+        // per division that's 2 mini leagues with 6 races - so 24 races total
+//        assertNotNull(result);
+//        assertEquals(24, result.size());
+        // TODO verify grouping - don't bother yet as we are missing match metadata
+    }
+
+    private void print(final Round round, final String prefix) {
+        log.info("%s %s".formatted(prefix, round.name()));
+        if (round.virtual()) {
+            round.subRounds().forEach(sr -> print(sr, prefix + prefix.charAt(0)));
+        } else {
+            round.matches().forEach(m -> log.info("%s %s v %s".formatted(prefix, m.getTeamOne().name(), m.getTeamTwo().name())));
+        }
     }
 
 }
