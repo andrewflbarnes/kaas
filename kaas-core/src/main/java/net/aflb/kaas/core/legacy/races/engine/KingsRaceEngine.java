@@ -44,7 +44,7 @@ public class KingsRaceEngine implements RaceEngine {
      *
      */
     @Override
-    public List<Match> generateRacesFromSeeding(Round control, Map<String, List<Team>> competingTeams)
+    public List<Match<?>> generateRacesFromSeeding(Round control, Map<String, List<Team>> competingTeams)
             throws RaceGenerationFailException {
 
         // Create the race groups and races for each division
@@ -70,9 +70,9 @@ public class KingsRaceEngine implements RaceEngine {
 
         // Create a single list of races in the order they will be run
         //TODO Comments!
-        List<Match> allRaces = new ArrayList<>();
+        List<Match<?>> allRaces = new ArrayList<>();
         Collection<RaceGroup> groups;
-        List<Match> theseRaces;
+        List<Match<?>> theseRaces;
         for (int i = 0; i < 3; i++) {
             for (int j = 0, n = allRaceGroups.size(); j < n; j++) {
                 groups = allRaceGroups.get(j).values();
@@ -219,15 +219,15 @@ public class KingsRaceEngine implements RaceEngine {
      *
      */
     @Override
-    public List<Match> generateRacesFromResults(Round control, Map<String, List<Match>> previousSetRaces,
-                                               Map<String, List<Team>> teams, int raceSetNo, boolean isKnockouts)
+    public List<Match<?>> generateRacesFromResults(Round control, Map<String, List<Match<?>>> previousSetRaces,
+                                                   Map<String, List<Team>> teams, int raceSetNo, boolean isKnockouts)
             throws RaceGenerationFailException {
 
         List<Map<String, RaceGroup>> allRaceGroups = new ArrayList<>(3);
 
         for (String division : previousSetRaces.keySet()) {
             List<Team> divisionTeams = teams.get(division);
-            List<Match> divisionRaces = previousSetRaces.get(division);
+            List<Match<?>> divisionRaces = previousSetRaces.get(division);
             Map<String, RaceGroup> divisionRaceGroup =
                     generateResultsRaceGroupMap(control, divisionTeams, divisionRaces, isKnockouts, raceSetNo);
             allRaceGroups.add(divisionRaceGroup);
@@ -248,9 +248,9 @@ public class KingsRaceEngine implements RaceEngine {
         }
 
         // Create a single list of races in the order they will be run
-        List<Match> allRaces = new ArrayList<>();
+        List<Match<?>> allRaces = new ArrayList<>();
         Collection<RaceGroup> groups;
-        List<Match> theseRaces;
+        List<Match<?>> theseRaces;
         for (int i = 0; i < 3; i++) {
             for (int j = 0, n = allRaceGroups.size(); j < n; j++) {
                 groups = allRaceGroups.get(j).values();
@@ -266,9 +266,9 @@ public class KingsRaceEngine implements RaceEngine {
 
 
         if (isKnockouts) {
-            Collections.sort(allRaces, new Comparator<Match>() {
+            Collections.sort(allRaces, new Comparator<Match<?>>() {
                 @Override
-                public int compare(Match raceOne, Match raceTwo) {
+                public int compare(Match<?> raceOne, Match<?> raceTwo) {
                     return -1;
                     // FIXME
 //                    int check = raceTwo.getDivision().toUpperCase().toCharArray()[0] -
@@ -321,7 +321,7 @@ public class KingsRaceEngine implements RaceEngine {
      * @throws RaceGenerationFailException
      *             If there is any error generating the race groups or races
      */
-    private Map<String, RaceGroup> generateResultsRaceGroupMap(Round control, List<Team> teamsList, List<Match> racesList, boolean isKnockouts, int raceSetNo) throws
+    private Map<String, RaceGroup> generateResultsRaceGroupMap(Round control, List<Team> teamsList, List<Match<?>> racesList, boolean isKnockouts, int raceSetNo) throws
             RaceGenerationFailException {
 
         List<RaceGroup> raceGroups = RaceGroup.racesToList(racesList, teamsList);

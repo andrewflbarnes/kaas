@@ -55,6 +55,12 @@ import java.util.Map;
 public class SetOneMatchGenerator implements MatchGenerator {
     private static final int THIS_ROUND_NO = 1;
 
+    /**
+     * Doesn't actually return anything - side effects on the {@code round}
+     * @param round
+     * @return
+     */
+    @Override
     public List<Match<?>> generate(final Round round) {
 
         final var competingTeams = round.seeds();
@@ -65,39 +71,37 @@ public class SetOneMatchGenerator implements MatchGenerator {
         round.subRounds().add(set1);
 
         // Create the race groups and races for each division
-        List<Map<String, RaceGroup>> allRaceGroups = new ArrayList<>(3);
         for (Map.Entry<Division, List<Team>> kv : competingTeams.entrySet()) {
-            final Division division = kv.getKey();
-            final List<Team> teams = kv.getValue();
+            final var division = kv.getKey();
+            final var teams = kv.getValue();
             Collections.sort(teams);
             log.debug("{} competing seeds", division.name());
             teams.forEach(team -> log.debug("{}", team.name()));
+            final var setDivision = Round.of(true, division.name(), Collections.singletonMap(division, teams), round.league());
             // FIXME - holdover from android, we should propagate the exception
             final Map<String, RaceGroup> raceGroupMap;
             try {
-//                allRaceGroups.add(generateRaceGroupMap(teams));
                 raceGroupMap = generateRaceGroupMap(teams);
             } catch (InvalidNumberOfTeamsException e) {
                 log.error("Unable to generate races", e);
                 return null;
             }
-            final var setDivision = Round.of(true, division.name(), Collections.singletonMap(division, teams), round.league());
             final var groups = raceGroupMap.values();
-            // TODO - we don't do the below anymore! This functionaltiy is disabled and we probably want to let the
-            //  caller manage it....
-            // We split every minileague into 3 sections...
-//            for (int i = 0; i < 3; i++) {
-//                for (RaceGroup group : groups) {
-//                    var theseRaces = group.getRaces(i);
-//                    set1Division.matches().addAll(theseRaces);
-//                }
-//            }
             groups.forEach(g -> {
                 // -1 is not a real section as this value is currently ignored
-                final var setDivisionMinileague = Round.of(
-                        false, g.getGroupName(), Collections.singletonMap(division, g.getTeams()), round.league());
-                final var races = g.getRaces(-1);
-                setDivisionMinileague.matches().addAll(races);
+                final var groupName = g.getGroupName();
+                final var groupTeams = Collections.singletonMap(division, g.getTeams());
+                final var setDivisionMinileague = Round.of(true, groupName, groupTeams, round.league());
+                final var partitions = g.getMatches();
+                for (int i = 0; i < partitions.size(); i++) {
+                    // TODO set partition teams properly (we could reduce over matches but this seems ugly...)
+                    final var partitionTeams = groupTeams;
+                    final var setDivisionMinileaguePartition = Round.of(
+                            false, "%s partition %d".formatted(groupName, i + 1), partitionTeams, round.league());
+                    setDivisionMinileaguePartition.matches().addAll(partitions.get(i));
+
+                    setDivisionMinileague.subRounds().add(setDivisionMinileaguePartition);
+                }
                 setDivision.subRounds().add(setDivisionMinileague);
             });
             set1.subRounds().add(setDivision);

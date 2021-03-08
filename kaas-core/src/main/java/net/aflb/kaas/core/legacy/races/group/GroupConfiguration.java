@@ -142,7 +142,7 @@ public class GroupConfiguration {
 		List<Match> races = new ArrayList<>();
 //		String division = teams.get(0).getDivision();
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < raceGrid.length; i++) {
 			for (int j = 0; j < raceGrid[i].length; j++) {
 				Match race = Match.of(teams.get(raceGrid[i][j][0] - 1),teams.get(raceGrid[i][j][1] - 1));
 //				race.setControlId(controlId);

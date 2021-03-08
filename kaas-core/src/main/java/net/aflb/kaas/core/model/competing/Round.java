@@ -72,13 +72,14 @@ public record Round(
 
 
     public String debug() {
-        return debug(DEBUG_PREFIX);
+        return debug(DEBUG_PREFIX, "");
     }
 
-    protected String debug(final String prefix) {
-        var debugOutput = "\n%s %s".formatted(prefix, name);
+    protected String debug(final String prefix, final String label) {
+        final var labeledName = label.isEmpty() ? name : "%s | %s".formatted(label, name);
+        var debugOutput = "\n%s %s".formatted(prefix, labeledName);
         if (this.virtual()) {
-            debugOutput += subRounds.stream().map(sr -> sr.debug(prefix + prefix.charAt(0)))
+            debugOutput += subRounds.stream().map(sr -> sr.debug(prefix + prefix.charAt(0), labeledName))
                     .collect(Collectors.joining());
         } else {
             debugOutput += matches.stream().map(m -> "\n%s %s v %s".formatted(prefix, m.getTeamOne().name(), m.getTeamTwo().name()))

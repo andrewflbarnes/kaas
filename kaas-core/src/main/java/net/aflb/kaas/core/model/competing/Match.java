@@ -4,7 +4,6 @@ import lombok.Data;
 import net.aflb.kaas.core.KaasID;
 import net.aflb.kaas.core.model.Team;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 @Data
@@ -23,8 +22,8 @@ public class Match<T> {
     private Team winner = null;
     private T meta = null;
 
-    public static Match of(final Team teamOne, final Team teamTwo) {
-        return new Match(
+    public static <T> Match<T> of(final Team teamOne, final Team teamTwo) {
+        return new Match<>(
                 GEN.get(),
                 teamOne,
                 teamTwo);

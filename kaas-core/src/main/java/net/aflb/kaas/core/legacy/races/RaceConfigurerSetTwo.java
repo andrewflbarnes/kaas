@@ -166,9 +166,9 @@ class RaceConfigurerSetTwo /* extends AsyncTask<Void, String, Boolean> */ {
 		}
 
 		// Create a single list of Matchs in the order they will be run
-		List<Match> allMatchs = new ArrayList<>();
+		List<Match<?>> allMatchs = new ArrayList<>();
 		Collection<RaceGroup> groups;
-		List<Match> theseMatchs;
+		List<Match<?>> theseMatchs;
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0, n = allRaceGroups.size(); j < n; j++) {
 				groups = allRaceGroups.get(j).values();
@@ -189,9 +189,9 @@ class RaceConfigurerSetTwo /* extends AsyncTask<Void, String, Boolean> */ {
 //		this.raceDatasource.deleteMatchs(allMatchs.get(0).getControlId(), this.MatchSetNo);
 
         if (this.isKnockouts) {
-            Collections.sort(allMatchs, new Comparator<Match>() {
+            Collections.sort(allMatchs, new Comparator<Match<?>>() {
                 @Override
-                public int compare(Match matchOne, Match matchTwo) {
+                public int compare(Match<?> matchOne, Match<?> matchTwo) {
 //                    int check = matchTwo.getDivision().toUpperCase().toCharArray()[0] -
 //                            matchOne.getDivision().toUpperCase().toCharArray()[0];
 //                    String divisionLetter;

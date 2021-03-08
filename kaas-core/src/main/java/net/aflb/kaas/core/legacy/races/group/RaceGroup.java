@@ -3,6 +3,7 @@ package net.aflb.kaas.core.legacy.races.group;
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.Team;
+import net.aflb.kaas.core.model.competing.Round;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,11 +23,9 @@ public class RaceGroup {
 	private static final int TEAM_NOT_FOUND = -1;
 
 	private List<Team> teams;
-	private List<Match> matches;
 	private GroupConfiguration configuration;
-	private long controlId;
-	private long roundNo;
 	private String groupName;
+	private List<List<Match<?>>> matches;
 
 	/**
 	 * Blank constructor
@@ -55,8 +54,6 @@ public class RaceGroup {
 		this.groupName = groupName;
 		this.teams = teams;
 		this.configuration = configuration;
-		this.controlId = controlId;
-		this.roundNo = roundNo;
 	}
 
 	/**
@@ -75,78 +72,10 @@ public class RaceGroup {
 	}
 
 	/**
-	 * @return the list of {@link Match}es being run in this group
-	 */
-	public List<Match> getMatches() {
-		return matches;
-	}
-
-	/**
-	 * @param matches
-	 *            the list of {@link Match}es being run in this group
-	 */
-	public void setMatches(List<Match> matches) {
-		this.matches = matches;
-	}
-
-	/**
-	 * @return the configuration for this group
-	 */
-	public GroupConfiguration getConfiguration() {
-		return configuration;
-	}
-
-	/**
-	 * @param configuration
-	 *            the configuration for this group
-	 */
-	public void setConfiguration(GroupConfiguration configuration) {
-		this.configuration = configuration;
-	}
-
-	/**
-	 * @return the control ID the races are being run under
-	 */
-	public long getControlId() {
-		return controlId;
-	}
-
-	/**
-	 * @param controlId
-	 *            the control ID the races are being run under
-	 */
-	public void setControlId(long controlId) {
-		this.controlId = controlId;
-	}
-
-	/**
-	 * @return the round number the races are being run under
-	 */
-	public long getRoundNo() {
-		return roundNo;
-	}
-
-	/**
-	 * @param roundNo
-	 *            the round number the races are being run under
-	 */
-	public void setRoundNo(long roundNo) {
-		this.roundNo = roundNo;
-	}
-
-	/**
 	 * @return the group name these races are being run under
 	 */
 	public String getGroupName() {
 		return groupName;
-	}
-
-	/**
-	 * @param groupName
-	 *            the group name these races are being run under
-	 */
-	public void setGroupName(String groupName) {
-		this.groupName = groupName;
 	}
 
 	/**
@@ -163,32 +92,55 @@ public class RaceGroup {
 	 *
 	 * @return true if the race list was generated, false otherwise.
 	 */
-	public boolean initRaces() {
+	public List<List<Match<?>>> initRaces() {
 		if (this.configuration == null) {
 			log.warn("group configuration not set");
-			return false;
+			return null;
 		}
 		if (this.teams == null || !hasFullTeamList()) {
 			log.warn("teams not set");
-			return false;
-		}
-		if (this.controlId < 1) {
-			log.warn("control ID not set");
-			return false;
-		}
-		if (this.roundNo < 1) {
-			log.warn("round number not set");
-			return false;
+			return null;
 		}
 		if (this.groupName == null || this.groupName.isEmpty()) {
 			log.warn("group name not set");
-			return false;
+			return null;
 		}
 
-		this.matches = this.configuration.createRaces(this.controlId,
-				this.roundNo, this.groupName, this.teams);
+//		this.matches = this.configuration.createRaces(this.controlId,
+//				this.roundNo, this.groupName, this.teams);
 
-		return this.matches.size() > 0;
+
+		final var raceGrid = configuration.getRaceGrid();
+
+		final List<List<Match<?>>> matches = new ArrayList<>();
+		for (var partition : raceGrid) {
+			final var partitionRaces = new ArrayList<Match<?>>();
+			matches.add(partitionRaces);
+			for (var match : partition) {
+				Match<?> race = Match.of(teams.get(match[0] - 1), teams.get(match[1] - 1));
+//				race.setControlId(controlId);
+//				race.setDivision(division);
+//				race.setGroup(group);
+//				race.setRoundNo(roundNo);
+//				// the raceGrid is human readable (i.e. 1 indexed) so we must
+//				// take 1 off when determining which listed team is competing
+//				race.setTeamOne(teams.get(raceGrid[i][j][0] - 1).getTeamId());
+//				race.setTeamTwo(teams.get(raceGrid[i][j][1] - 1).getTeamId());
+
+				partitionRaces.add(race);
+
+				log.debug("race added for division {division}, teams {} {}",
+						race.getTeamOne().name(),
+						race.getTeamTwo().name());
+			}
+		}
+
+		this.matches = matches;
+		return matches;
+	}
+
+	public List<List<Match<?>>> getMatches() {
+		return matches;
 	}
 
 	/**
@@ -204,8 +156,8 @@ public class RaceGroup {
 	 * @return the list of races assoiciated with the section
 	 */
 	// TODO interface annotation making use of private static final ints (for compile time checking)
-	public List<Match> getRaces(int section) {
-		return this.matches;
+	public List<Match<?>> getRaces(int section) {
+		return null;
 		// FIXME? Does it make sense to embed this idea down here it should we let the caller decide?
 //		List<Match> sectionRaces = new ArrayList<Match>();
 //
@@ -242,24 +194,25 @@ public class RaceGroup {
 		Map<Team, Integer> teamWins = new HashMap<>(6);
 		Map<Team, Integer> teamDsqs = new HashMap<>(6);
 
-		matches.forEach(race -> {
-			Stream.of(race.getTeamTwo(), race.getTeamTwo()).forEach(t -> {
-				// Update the wins if appropriate
-				if (t.equals(race.getWinner())) {
-					teamWins.compute(t, (k, score) -> score == null ? 0 : score + 1);
-				}
-				teamDsqs.computeIfAbsent(t, k -> 0);
-			});
-
-			// Update the DSQs if appropriate
-			if (race.getTeamOneDsq() != null && !race.getTeamOneDsq().isEmpty()) {
-				teamWins.computeIfPresent(race.getTeamOne(), (t, score) -> score + 1);
-			}
-			if (race.getTeamTwoDsq() != null && !race.getTeamTwoDsq().isEmpty()) {
-				teamWins.computeIfPresent(race.getTeamOne(), (t, score) -> score + 1);
-			}
-
-		});
+		// TODO
+//		matches.forEach(race -> {
+//			Stream.of(race.getTeamTwo(), race.getTeamTwo()).forEach(t -> {
+//				// Update the wins if appropriate
+//				if (t.equals(race.getWinner())) {
+//					teamWins.compute(t, (k, score) -> score == null ? 0 : score + 1);
+//				}
+//				teamDsqs.computeIfAbsent(t, k -> 0);
+//			});
+//
+//			// Update the DSQs if appropriate
+//			if (race.getTeamOneDsq() != null && !race.getTeamOneDsq().isEmpty()) {
+//				teamWins.computeIfPresent(race.getTeamOne(), (t, score) -> score + 1);
+//			}
+//			if (race.getTeamTwoDsq() != null && !race.getTeamTwoDsq().isEmpty()) {
+//				teamWins.computeIfPresent(race.getTeamOne(), (t, score) -> score + 1);
+//			}
+//
+//		});
 
 		// TODO
 		teams.stream().forEach(t -> {
@@ -445,36 +398,36 @@ public class RaceGroup {
 		int retval = 0;
 		int racesFound = 0;
 		int unrunRaces = 0;
-
-		for (int i = 0, n = this.matches.size(); i < n; i++) {
-			Match match = this.matches.get(i);
-			// TODO sort out duplicated code
-			// FIXME for above???
-			if (match.getTeamOne() == teamOne && match.getTeamTwo() == teamTwo) {
-				retval += match.getWinner() == null
-						? 0
-						: match.getWinner() == teamOne ? 1 : -1;
-				if (match.getWinner() == teamOne) {
-					retval += 1;
-				} else if (match.getWinner() == teamTwo) {
-					retval -= 1;
-				} else {
-					unrunRaces += 1;
-				}
-				racesFound += 1;
-			} else if (match.getTeamOne() == teamOne
-					&& match.getTeamTwo() == teamTwo) {
-				if (match.getWinner() == teamOne) {
-					retval -= 1;
-				} else if (match.getWinner() == teamTwo) {
-					retval += 1;
-				} else {
-					unrunRaces += 1;
-				}
-
-				racesFound += 1;
-			}
-		}
+		// FIXME
+//		for (int i = 0, n = this.matches.size(); i < n; i++) {
+//			Match match = this.matches.get(i);
+//			// TODO sort out duplicated code
+//			// FIXME for above???
+//			if (match.getTeamOne() == teamOne && match.getTeamTwo() == teamTwo) {
+//				retval += match.getWinner() == null
+//						? 0
+//						: match.getWinner() == teamOne ? 1 : -1;
+//				if (match.getWinner() == teamOne) {
+//					retval += 1;
+//				} else if (match.getWinner() == teamTwo) {
+//					retval -= 1;
+//				} else {
+//					unrunRaces += 1;
+//				}
+//				racesFound += 1;
+//			} else if (match.getTeamOne() == teamOne
+//					&& match.getTeamTwo() == teamTwo) {
+//				if (match.getWinner() == teamOne) {
+//					retval -= 1;
+//				} else if (match.getWinner() == teamTwo) {
+//					retval += 1;
+//				} else {
+//					unrunRaces += 1;
+//				}
+//
+//				racesFound += 1;
+//			}
+//		}
 
 		// If the race doesn't exist throw an unchecked exception - the way we
 		// currently run races, all teams in a group compete against each other.
@@ -604,7 +557,7 @@ public class RaceGroup {
 	 *            A list of {@link Team}s containing the teams racing
 	 * @return The {@link RaceGroup} equivalent of the {@link Match}es
 	 */
-	public static List<RaceGroup> racesToList(final List<Match> races, final List<Team> teams) {
+	public static List<RaceGroup> racesToList(final List<Match<?>> races, final List<Team> teams) {
 		List<RaceGroup> raceGroups = new ArrayList<>();
 
 		// Check that the list of races is not null or empty
