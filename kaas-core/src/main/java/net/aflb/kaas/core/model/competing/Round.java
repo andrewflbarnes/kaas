@@ -69,6 +69,22 @@ public record Round(
         }
     }
 
+    public Map<Division, List<Team>> teamRankings() {
+        return seeds.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().stream()
+                        .map(t -> new Ranking<>(t, getTeamWins(t)))
+                        .sorted(Ranking.BY_WEIGHT)
+                        .map(Ranking::entity)
+                        .collect(Collectors.toList())));
+    }
+
+    public long getTeamWins(final Team team) {
+        return matches().stream()
+                .filter(m -> team.equals(m.getWinner()))
+                .count();
+    }
+
     public boolean isComplete() {
         if (virtual) {
             return subRounds.stream().allMatch(Round::isComplete);

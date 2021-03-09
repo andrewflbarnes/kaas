@@ -12,8 +12,10 @@ import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
 import net.aflb.kaas.kings.engine.StandardMatchListGenerator;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -111,9 +113,9 @@ class SetOneMatchGeneratorTest {
         // per division that's 2 mini leagues with 6 races - so 24 races total
         assertNotNull(round.matches());
         assertEquals(24, round.matches().size());
-        round.matches().forEach(m -> m.setWinner(Match.Winner.ONE));
         // TODO verify grouping - don't bother yet as we are missing match metadata
 
+        // slightly deeper checks
         final var sets = round.subRounds();
         assertNotNull(sets);
         assertEquals(1, sets.size());
@@ -124,8 +126,43 @@ class SetOneMatchGeneratorTest {
         assertNotNull(divisions);
         assertEquals(2, divisions.size());
 
+        // check ranking
+        final var seconds = List.of(team22, team62);
+        round.matches().forEach(m -> {
+            if (seconds.contains(m.getTeamOne())) {
+                m.setWinner(Match.Winner.ONE);
+            }
+            if (seconds.contains(m.getTeamTwo())) {
+                m.setWinner(Match.Winner.TWO);
+            }
+        });
+        final var winners = List.of(team13, team51);
+        round.matches().forEach(m -> {
+            if (winners.contains(m.getTeamOne())) {
+                m.setWinner(Match.Winner.ONE);
+            }
+            if (winners.contains(m.getTeamTwo())) {
+                m.setWinner(Match.Winner.TWO);
+            }
+        });
+        final var actualSeconds = new ArrayList<Team>();
+        final var actualWinners = new ArrayList<Team>();
+        divisions.forEach(d -> d.teamRankings().values().forEach(ts -> {
+            actualWinners.add(ts.get(0));
+            actualSeconds.add(ts.get(1));
+        }));
+        assertEquals(winners, actualWinners);
+        assertEquals(seconds, actualSeconds);
+//        divisions.forEach(d -> d.teamRankings().forEach((div, ts) -> {
+//            log.info("{} {}", div.name(), ts.get(0));
+//            log.info("{} {}", div.name(), ts.get(1));
+//        }));
+
+        // check list generation
         final var matchListGenerator = new StandardMatchListGenerator();
         final var matchList = matchListGenerator.generate(set);
+        assertEquals(24, matchList.size());
+
         log.info("RACELIST %s".formatted(set.name()));
         matchList.forEach(match ->
                 log.info("{} : {} v {} {}", match.getKassId(), match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner()));
