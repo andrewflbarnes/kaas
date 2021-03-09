@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public record Round(
@@ -26,7 +25,7 @@ public record Round(
         boolean virtual,
         // One of
         List<Round> subRounds,
-        List<Match> matches
+        List<Match<?>> matches
 ) {
     private static final String DEBUG_PREFIX = ">";
 
@@ -47,7 +46,7 @@ public record Round(
         return seeds.keySet();
     }
 
-    public List<Match> matches() {
+    public List<Match<?>> matches() {
         if (virtual) {
             return subRounds.stream()
                     .map(Round::matches)
@@ -58,7 +57,7 @@ public record Round(
         }
     }
 
-    public List<Match> matches(final Comparator<Match> comparator) {
+    public List<Match<?>> matches(final Comparator<Match<?>> comparator) {
         if (virtual) {
             return subRounds.stream()
                     .map(Round::matches)

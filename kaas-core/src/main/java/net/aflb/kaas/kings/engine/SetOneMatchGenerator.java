@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -70,23 +71,25 @@ public class SetOneMatchGenerator implements MatchGenerator {
         round.subRounds().add(set1);
 
         // Create the race groups and races for each division
-        for (Map.Entry<Division, List<Team>> kv : competingTeams.entrySet()) {
-            final var division = kv.getKey();
-            final var teams = kv.getValue();
+        // TODO something better?
+        final var divisions = competingTeams.keySet().stream()
+                .sorted(Division.BY_RANK)
+                .collect(Collectors.toList());
+        for (final var division : divisions) {
+            final var teams = competingTeams.get(division);
             Collections.sort(teams);
             log.debug("{} competing seeds", division.name());
             teams.forEach(team -> log.debug("{}", team.name()));
             final var setDivision = Round.of(true, division.name(), Collections.singletonMap(division, teams), round.league());
             // FIXME - holdover from android, we should propagate the exception
-            final Map<String, RaceGroup> raceGroupMap;
+            final List<RaceGroup> raceGroupMap;
             try {
                 raceGroupMap = generateRaceGroupMap(teams);
             } catch (InvalidNumberOfTeamsException e) {
                 log.error("Unable to generate races", e);
                 return null;
             }
-            final var groups = raceGroupMap.values();
-            groups.forEach(g -> {
+            raceGroupMap.forEach(g -> {
                 // -1 is not a real section as this value is currently ignored
                 final var groupName = g.getGroupName();
                 final var groupTeams = Collections.singletonMap(division, g.getTeams());
@@ -165,7 +168,7 @@ public class SetOneMatchGenerator implements MatchGenerator {
      *             The {@link RuntimeException} thrown when {@link RaceGroup}s
      *             cannot be created for the required number of teams
      */
-    public Map<String, RaceGroup> generateRaceGroupMap(List<Team> competingTeams) throws InvalidNumberOfTeamsException {
+    public List<RaceGroup> generateRaceGroupMap(List<Team> competingTeams) throws InvalidNumberOfTeamsException {
         // Initialise the Map we are returning
         // FIXME??? Was android ArrayMap
         Map<String, RaceGroup> raceGroups = new HashMap<>();
@@ -227,6 +230,6 @@ public class SetOneMatchGenerator implements MatchGenerator {
             log.info("race group " + groupNames[i] + " created, initialised and added");
         }
 
-        return raceGroups;
+        return new ArrayList<>(raceGroups.values());
     }
 }

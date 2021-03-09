@@ -9,16 +9,16 @@ import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
+import net.aflb.kaas.kings.engine.StandardMatchListGenerator;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class SetOneMatchGeneratorTest {
@@ -27,8 +27,8 @@ class SetOneMatchGeneratorTest {
     void test() {
         final Registry registry = new Registry();
         final League league = League.of("league");
-        final Division division1 = Division.of("division1");
-        final Division division2 = Division.of("division2");
+        final Division division1 = Division.of("division1",1);
+        final Division division2 = Division.of("division2", 2);
         final Club club1 = Club.of("Club 1");
         final Club club2 = Club.of("Club 2");
         final Club club3 = Club.of("Club 3");
@@ -104,35 +104,31 @@ class SetOneMatchGeneratorTest {
 //        result.forEach(m -> log.info("{} v {}", m.getTeamOne().name(), m.getTeamTwo().name()));
 
         log.info("{}", round.debug());
-        round.subRounds().forEach(this::printOrderedPartition);
 //        print(round, ">");
 
         // Assume the kings implementation for now
         // so 2 divisions with 8 teams on round 1
         // per division that's 2 mini leagues with 6 races - so 24 races total
-//        assertNotNull(result);
-//        assertEquals(24, result.size());
+        assertNotNull(round.matches());
+        assertEquals(24, round.matches().size());
+        round.matches().forEach(m -> m.setWinner(Match.Winner.ONE));
         // TODO verify grouping - don't bother yet as we are missing match metadata
-    }
 
-    private void printOrderedPartition(final Round set) {
-        final List<List<Match>> partitions = new ArrayList<>();
-        set.subRounds().forEach(division -> {
-            division.subRounds().forEach(group -> {
-                for (int i = 0; i < group.subRounds().size(); i++) {
-                    final var partition = group.subRounds().get(i);
-                    if (partitions.size() < i + 1) {
-                        partitions.add(new ArrayList<>());
-                    }
-                    partitions.get(i).addAll(partition.matches());
-                }
-            });
-        });
+        final var sets = round.subRounds();
+        assertNotNull(sets);
+        assertEquals(1, sets.size());
 
+        final var set = sets.get(0);
+
+        final var divisions = set.subRounds();
+        assertNotNull(divisions);
+        assertEquals(2, divisions.size());
+
+        final var matchListGenerator = new StandardMatchListGenerator();
+        final var matchList = matchListGenerator.generate(set);
         log.info("RACELIST %s".formatted(set.name()));
-        partitions.forEach(partition -> {
-            partition.forEach(match -> log.info("{} v {}", match.getTeamOne().name(), match.getTeamTwo().name()));
-        });
+        matchList.forEach(match ->
+                log.info("{} : {} v {} {}", match.getKassId(), match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner()));
     }
 
 }

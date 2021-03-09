@@ -1,14 +1,18 @@
 package net.aflb.kaas.core.model;
 
+import java.util.Comparator;
 import java.util.Locale;
 
 public record Division(
         long id,
-        String name
+        String name,
+        int rank
 ) implements Comparable<Division> {
-    public static Division of(final String name) {
+    public static final Comparator<Division> BY_RANK = Comparator.comparingInt(Division::rank);
+
+    public static Division of(final String name, final int rank) {
         // FIXME
-        return new Division(System.currentTimeMillis(), name);
+        return new Division(System.currentTimeMillis(), name, rank);
     }
 
     @Override
