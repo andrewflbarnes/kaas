@@ -6,12 +6,15 @@ import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.League;
 import net.aflb.kaas.core.model.Registry;
 import net.aflb.kaas.core.model.Team;
+import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -101,6 +104,7 @@ class SetOneMatchGeneratorTest {
 //        result.forEach(m -> log.info("{} v {}", m.getTeamOne().name(), m.getTeamTwo().name()));
 
         log.info("{}", round.debug());
+        round.subRounds().forEach(this::printOrderedPartition);
 //        print(round, ">");
 
         // Assume the kings implementation for now
@@ -111,13 +115,24 @@ class SetOneMatchGeneratorTest {
         // TODO verify grouping - don't bother yet as we are missing match metadata
     }
 
-    private void print(final Round round, final String prefix) {
-        log.info("%s %s".formatted(prefix, round.name()));
-        if (round.virtual()) {
-            round.subRounds().forEach(sr -> print(sr, prefix + prefix.charAt(0)));
-        } else {
-            round.matches().forEach(m -> log.info("%s %s v %s".formatted(prefix, m.getTeamOne().name(), m.getTeamTwo().name())));
-        }
+    private void printOrderedPartition(final Round set) {
+        final List<List<Match>> partitions = new ArrayList<>();
+        set.subRounds().forEach(division -> {
+            division.subRounds().forEach(group -> {
+                for (int i = 0; i < group.subRounds().size(); i++) {
+                    final var partition = group.subRounds().get(i);
+                    if (partitions.size() < i + 1) {
+                        partitions.add(new ArrayList<>());
+                    }
+                    partitions.get(i).addAll(partition.matches());
+                }
+            });
+        });
+
+        log.info("RACELIST %s".formatted(set.name()));
+        partitions.forEach(partition -> {
+            partition.forEach(match -> log.info("{} v {}", match.getTeamOne().name(), match.getTeamTwo().name()));
+        });
     }
 
 }

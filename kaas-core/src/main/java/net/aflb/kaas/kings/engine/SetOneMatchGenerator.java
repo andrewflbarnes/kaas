@@ -15,7 +15,6 @@ import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.spi.MatchGenerator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -106,43 +105,6 @@ public class SetOneMatchGenerator implements MatchGenerator {
             });
             set1.subRounds().add(setDivision);
         }
-
-        // Create a single list of races in the order they will be run
-        // TODO Relocate this partitioning somewhere else and remove the fake partitioning (only occuring per division)
-        //  from above
-//        final List<Match<?>> allRaces = new ArrayList<>();
-//        Collection<RaceGroup> groups;
-//        for (int i = 0; i < 3; i++) {
-//            for (int j = 0, n = allRaceGroups.size(); j < n; j++) {
-//                groups = allRaceGroups.get(j).values();
-//                for (RaceGroup group : groups) {
-//                    var theseRaces = group.getRaces(i);
-//                    for (int k = 0, m = theseRaces.size(); k < m; k++) {
-//                        allRaces.add(theseRaces.get(k));
-//                    }
-//                }
-//            }
-//        }
-
-        // TODO relocate this somewhere meaningful
-        // Check that the public external storage is writable
-//        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-//            final String PDF_FILE_NAME = "%s_kings_races_set_1.pdf";
-//            String pdf = String.format(Locale.ENGLISH, PDF_FILE_NAME, DATE_FORMATTER.format(new Date()));
-//            /*
-//             * Dies:
-//             * new File(Environment.getExternalStoragePublicDirectory("Race_Lists"), pdf)
-//             * Good:
-//             * new File(context.getExternalFilesDir("Race_Lists"), pdf);
-//             * new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), pdf);
-//             * new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), pdf)
-//             */
-//            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), pdf);
-//            writer.writeRaceList(allRaces, teamDatasource.getTeams(null, null, null), file, "UTF-8");
-//        } else {
-//            log.error(LOG_TAG, "External media is not in a writable state");
-//            publishProgress("Unable to create PDF!");
-//        }
 
         return null;
     }

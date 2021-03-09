@@ -39,4 +39,8 @@ public class Match<T> {
             case TWO -> teamTwo;
         };
     }
+
+    public boolean isComplete() {
+        return this.winner != null;
+    }
 }

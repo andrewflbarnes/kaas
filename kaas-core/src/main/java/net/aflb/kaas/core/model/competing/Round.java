@@ -5,12 +5,12 @@ import net.aflb.kaas.core.model.League;
 import net.aflb.kaas.core.model.Team;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public record Round(
@@ -70,6 +70,13 @@ public record Round(
         }
     }
 
+    public boolean isComplete() {
+        if (virtual) {
+            return subRounds.stream().allMatch(Round::isComplete);
+        } else {
+            return matches.stream().allMatch(Match::isComplete);
+        }
+    }
 
     public String debug() {
         return debug(DEBUG_PREFIX, "");
