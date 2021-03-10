@@ -1,16 +1,17 @@
 package net.aflb.kaas.core.legacy.races.group;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.Team;
-import net.aflb.kaas.core.model.competing.Round;
+import net.aflb.kaas.core.model.competing.Match;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * This class is equivalent to the Tables configuration in the excel cheat sheet
@@ -158,26 +159,23 @@ public class RaceGroup {
 	// TODO interface annotation making use of private static final ints (for compile time checking)
 	public List<Match<?>> getRaces(int section) {
 		return null;
-		// FIXME? Does it make sense to embed this idea down here it should we let the caller decide?
-//		List<Match> sectionRaces = new ArrayList<Match>();
-//
-//		if (this.matches != null && this.matches.size() > 0 && section < 3) {
-//			int raceIdx = 0;
-//			switch (section) {
-//			case 2:
-//				raceIdx += this.configuration.getRaceGrid()[1].length;
-//			case 1:
-//				raceIdx += this.configuration.getRaceGrid()[0].length;
-//			default:
-//			}
-//
-//			for (int i = 0; i < this.configuration.getRaceGrid()[section].length; i++) {
-//				sectionRaces.add(this.matches.get(raceIdx));
-//				raceIdx++;
-//			}
-//		}
-//
-//		return sectionRaces;
+	}
+
+	@RequiredArgsConstructor
+	private static class WinDsq {
+		private final Team team;
+		private int wins = 0;
+		private int dsqs = 0;
+		private int adjustments = 0;
+
+		int weighting() {
+			return 100 * wins - 10 * dsqs + adjustments;
+		}
+	}
+
+	// TODO get from apache commons or similar
+	private static boolean isEmpty(final String test) {
+		return test == null || test.isBlank();
 	}
 
 	/**
@@ -186,39 +184,27 @@ public class RaceGroup {
 	 *
 	 * @return the list of teams from this group
 	 */
-	public List<Team> getTeamWinsAndDsqs() {
-		List<Team> teamWinsAndDsqs = new ArrayList<Team>();
+	public Map<Team, WinDsq> getTeamWinsAndDsqs() {
+		final Map<Team, WinDsq> teamWinsAndDsqs = new HashMap<>(6);
 
-		// TODO Do we need these SparseIntArrays? I suspect not
-		// Get a list of unique teams competing
-		Map<Team, Integer> teamWins = new HashMap<>(6);
-		Map<Team, Integer> teamDsqs = new HashMap<>(6);
+		// FIXME - what if we're not complete? NPE central!
+		matches.stream().flatMap(List::stream).forEach(match -> {
+			final Team teamOne = match.getTeamOne();
+			final Team teamTwo = match.getTeamTwo();
 
-		// TODO
-//		matches.forEach(race -> {
-//			Stream.of(race.getTeamTwo(), race.getTeamTwo()).forEach(t -> {
-//				// Update the wins if appropriate
-//				if (t.equals(race.getWinner())) {
-//					teamWins.compute(t, (k, score) -> score == null ? 0 : score + 1);
-//				}
-//				teamDsqs.computeIfAbsent(t, k -> 0);
-//			});
-//
-//			// Update the DSQs if appropriate
-//			if (race.getTeamOneDsq() != null && !race.getTeamOneDsq().isEmpty()) {
-//				teamWins.computeIfPresent(race.getTeamOne(), (t, score) -> score + 1);
-//			}
-//			if (race.getTeamTwoDsq() != null && !race.getTeamTwoDsq().isEmpty()) {
-//				teamWins.computeIfPresent(race.getTeamOne(), (t, score) -> score + 1);
-//			}
-//
-//		});
+			// Update wins
+			teamWinsAndDsqs.get(match.getWinner()).wins += 1;
 
-		// TODO
-		teams.stream().forEach(t -> {
-//			t.setSetOneWins(teamWins.get(t));
-//			t.setSetOneDsqs(teamDsqs.get(t));
-//			teamWinsAndDsqs.add(t);
+			// Update the DSQs if appropriate
+			teamWinsAndDsqs.computeIfAbsent(teamOne, WinDsq::new);
+			if (!isEmpty(match.getTeamOneDsq())) {
+				teamWinsAndDsqs.get(teamOne).dsqs += 1;
+			}
+			teamWinsAndDsqs.computeIfAbsent(teamTwo, WinDsq::new);
+			if (!isEmpty(match.getTeamTwoDsq())) {
+				teamWinsAndDsqs.get(teamTwo).dsqs += 1;
+			}
+
 		});
 
 		return teamWinsAndDsqs;
@@ -240,72 +226,65 @@ public class RaceGroup {
 	 *             this group
 	 */
 	public List<Team> getSetOneTeamOrder() throws RacesUnfinishedException, MarkBoothException {
-		List<Team> teamOrder = getTeamWinsAndDsqs();
+		Map<Team, WinDsq> teamOrder = getTeamWinsAndDsqs();
 
-		// Get the team wins and DSQs as an Array and set the weighting
-		Team[] passOne = new Team[teamOrder.size()];
-		for (int i = 0, n = teamOrder.size(); i < n; i++) {
-			passOne[i] = teamOrder.get(i);
-			// FIXME
-//			passOne[i].setSetWeighting(passOne[i].getSetOneWins() * 10 - passOne[i].getSetOneDsqs());
-		}
-
-		// First pass: rough ordering based on scores and disqualifications
-		Team tempTeam;
-		for (int i = 0, n = passOne.length; i < n - 1; i++) {
-			for (int j = i + 1; j < n; j++) {
-				// FIXME
-//				if (passOne[j].getSetWeighting() > passOne[i].getSetWeighting()) {
-//					tempTeam = passOne[i];
-//					passOne[i] = passOne[j];
-//					passOne[j] = tempTeam;
-//				}
-			}
-		}
+		// pass one - we have a built in weighting which we sort on giving approximate team standings
+		final var passOne = teamOrder.values().stream()
+				.sorted(Comparator.comparingInt(WinDsq::weighting))
+				.collect(Collectors.toList());
 
 		// Second pass: traverse through the array and find drawing teams
 		// -two drawing teams, single race:
 		// ---see who won the race
 		// -two drawing teams, 2 races:
-		// ---see who won the races, if drawn require a rerun (butthurt)
-		// -three drawing teams, single races (mitigated butthurt):
-		// ---techinically we need to rerun all these, but we can't risk a
+		// ---see who won the races, if drawn require a rerun
+		// -three drawing teams, single races (FIXME):
+		// ---technically we need to rerun all these, but we can't risk a
 		// ---repeat result (as it could continue forever. Instead we take the
 		// ---highest seeded team as first and then check who won the race
 		// ---between the two lower teams.
-		// -three drawing teams, 2 races (proper butthurt):
+		// -three drawing teams, 2 races (FIXME):
 		// ---Why the fuck do you even have a division with 4 teams in it?
 		// ---Anyway, as above take the highest seeded, then compare the
 		// ---lower teams. If they have drawn require a rerun.
-		// -four drawing teams (surprisingly, possible in a group of 6):
+		// -four drawing teams (surprisingly, possible in a group of 6) (TODO):
 		// ---this is too complex for my poor brain. Basically you can
 		// ---take into account of how races played out between these 4
 		// ---teams with the undrawn teams to determine who is better/worse
 		// ---splitting them into a drawn group of 3 and 1 or two drawn groups
 		// ---of two.
 		// ---Yeah so, I'm not coding the 4 case draw for shit.
-		// ---Lob in an exception for this, relay info to user via Toast and
-		// ---tell them to "massage" (Mark Booth) the figures.
+		// ---Lob in an exception for this, relay info to user and telll them to
+		// ---"massage" the figures.
 
-		Team[] passTwo = new Team[passOne.length];
-		List<Team> seedCheck = new ArrayList<Team>(3);
-		int whoWon;
-		for (int i = 0, n = passOne.length, idx = 0; i < n; i = idx) {
-			passTwo[i] = passOne[i];
-
-			// FIXME
-//			while (idx < n - 1 && passTwo[i].getSetWeighting() == passOne[idx + 1].getSetWeighting()) {
-//				// Add teams if they have the same weighting
-//				idx ++;
-//				passTwo[idx] = passOne[idx];
-//			}
+		final var passTwo = new ArrayList<WinDsq>(passOne.size());
+		final List<Team> seedCheck = new ArrayList<>(3);
+		for (int i = 0, n = passOne.size(), idx = 0; i < n; i = idx) {
+			passTwo.clear();
+			final var current = passOne.get(i);
+			passTwo.add(current);
+			final var currentWeighting = current.weighting();
+			while (idx < n - 1 && currentWeighting == passOne.get(idx + 1).weighting()) {
+				// Add teams if they have the same weighting
+				idx ++;
+				passTwo.add(passOne.get(idx));
+			}
 
 			// We now have idx - i + 1 elements in passTwo with matching weightings
-			// in position i to idx
-			int numDrawnTeams = idx - i + 1;
+			int numDrawnTeams = passTwo.size();
+			//TODO
+//			switch (numDrawnTeams) {
+//				case 1:
+//					continue;
+//				case 2:
+//				case 3:
+//				default:
+//			}
+//			idx++;
 			if (numDrawnTeams == 2) {
+				int whoWon;
 				try {
-					whoWon = whoWon(passTwo[i], passTwo[i + 1]);
+					whoWon = whoWon(passTwo.get(i).team, passTwo.get(i + 1).team);
 				} catch (RaceNotRunException e) {
 					throw new RacesUnfinishedException(e);
 				}
@@ -330,6 +309,7 @@ public class RaceGroup {
 				passTwo[i + 2] = seedCheck.get(2);
 
 				// See who won of the other two
+				int whoWon;
 				try {
 					whoWon = whoWon(passTwo[i + 1], passTwo[i + 2]);
 				} catch (RaceNotRunException e) {
@@ -350,10 +330,9 @@ public class RaceGroup {
 				}
 			} else if (numDrawnTeams > 3) {
 				// More than 3 drawn teams throw exception
-				throw new MarkBoothException(String.valueOf(numDrawnTeams) + " team draw, massage required");
+				throw new MarkBoothException(numDrawnTeams + " team draw, massage required");
 			}
 
-			idx++;
 		}
 
 		// We now have the ordered teams in passTwo, just put them into teamOrder
@@ -399,35 +378,33 @@ public class RaceGroup {
 		int racesFound = 0;
 		int unrunRaces = 0;
 		// FIXME
-//		for (int i = 0, n = this.matches.size(); i < n; i++) {
-//			Match match = this.matches.get(i);
-//			// TODO sort out duplicated code
-//			// FIXME for above???
-//			if (match.getTeamOne() == teamOne && match.getTeamTwo() == teamTwo) {
-//				retval += match.getWinner() == null
-//						? 0
-//						: match.getWinner() == teamOne ? 1 : -1;
-//				if (match.getWinner() == teamOne) {
-//					retval += 1;
-//				} else if (match.getWinner() == teamTwo) {
-//					retval -= 1;
-//				} else {
-//					unrunRaces += 1;
-//				}
-//				racesFound += 1;
-//			} else if (match.getTeamOne() == teamOne
-//					&& match.getTeamTwo() == teamTwo) {
-//				if (match.getWinner() == teamOne) {
-//					retval -= 1;
-//				} else if (match.getWinner() == teamTwo) {
-//					retval += 1;
-//				} else {
-//					unrunRaces += 1;
-//				}
-//
-//				racesFound += 1;
-//			}
-//		}
+		for (int i = 0, n = this.matches.size(); i < n; i++) {
+			Match match = this.matches.get(i);
+			// TODO sort out duplicated code
+			// FIXME for above???
+			if (match.getTeamOne() == teamOne && match.getTeamTwo() == teamTwo) {
+				retval += match.getWinner() == null
+						? 0
+						: match.getWinner() == teamOne ? 1 : -1;
+				if (match.getWinner() == teamOne) {
+					retval += 1;
+				} else if (match.getWinner() == teamTwo) {
+					retval -= 1;
+				} else {
+					unrunRaces += 1;
+				}
+				racesFound += 1;
+			} else if (match.getTeamOne() == teamTwo && match.getTeamTwo() == teamOne) {
+				if (match.getWinner() == teamOne) {
+					retval -= 1;
+				} else if (match.getWinner() == teamTwo) {
+					retval += 1;
+				} else {
+					unrunRaces += 1;
+				}
+				racesFound += 1;
+			}
+		}
 
 		// If the race doesn't exist throw an unchecked exception - the way we
 		// currently run races, all teams in a group compete against each other.
