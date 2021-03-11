@@ -8,6 +8,10 @@ import net.aflb.kaas.core.model.Registry;
 import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.competing.Round;
+import net.aflb.kaas.core.spi.ManualInterventionException;
+import net.aflb.kaas.core.spi.MatchResultProcessor;
+import net.aflb.kaas.core.spi.RacesUnfinishedException;
+import net.aflb.kaas.engine.BasicMatchResultProcessor;
 import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
 import net.aflb.kaas.kings.engine.StandardMatchListGenerator;
 import org.junit.jupiter.api.Test;
@@ -25,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class SetOneMatchGeneratorTest {
 
     @Test
-    void test() {
+    void test() throws Exception {
         final Registry registry = new Registry();
         final League league = League.of("league");
         final Division division1 = Division.of("division1",1);
@@ -162,9 +166,24 @@ class SetOneMatchGeneratorTest {
         final var matchList = matchListGenerator.generate(set);
         assertEquals(24, matchList.size());
 
-        log.info("RACELIST %s".formatted(set.name()));
-        matchList.forEach(match ->
-                log.info("{} : {} v {} {}", match.getKassId(), match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner()));
+//        log.info("RACELIST %s".formatted(set.name()));
+//        matchList.forEach(match ->
+//                log.info("{} : {} v {} {}", match.getKassId(), match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner()));
+
+        final MatchResultProcessor mrp = new BasicMatchResultProcessor();
+
+
+        for (Round division : divisions) {
+            for (Round minileague : division.subRounds()) {
+                String msg = "%s->%s".formatted(division.name(), minileague.name());
+                try {
+                    final List<Team> teamResults = mrp.getResults(minileague.matches());
+                    teamResults.forEach(t -> log.info("{}->{}", msg, t.name()));
+                } catch (ManualInterventionException | RacesUnfinishedException e) {
+                    log.warn("{}->{}", msg, e.getMessage());
+                }
+            }
+        }
     }
 
 }

@@ -226,121 +226,123 @@ public class RaceGroup {
 	 *             this group
 	 */
 	public List<Team> getSetOneTeamOrder() throws RacesUnfinishedException, MarkBoothException {
-		Map<Team, WinDsq> teamOrder = getTeamWinsAndDsqs();
-
-		// pass one - we have a built in weighting which we sort on giving approximate team standings
-		final var passOne = teamOrder.values().stream()
-				.sorted(Comparator.comparingInt(WinDsq::weighting))
-				.collect(Collectors.toList());
-
-		// Second pass: traverse through the array and find drawing teams
-		// -two drawing teams, single race:
-		// ---see who won the race
-		// -two drawing teams, 2 races:
-		// ---see who won the races, if drawn require a rerun
-		// -three drawing teams, single races (FIXME):
-		// ---technically we need to rerun all these, but we can't risk a
-		// ---repeat result (as it could continue forever. Instead we take the
-		// ---highest seeded team as first and then check who won the race
-		// ---between the two lower teams.
-		// -three drawing teams, 2 races (FIXME):
-		// ---Why the fuck do you even have a division with 4 teams in it?
-		// ---Anyway, as above take the highest seeded, then compare the
-		// ---lower teams. If they have drawn require a rerun.
-		// -four drawing teams (surprisingly, possible in a group of 6) (TODO):
-		// ---this is too complex for my poor brain. Basically you can
-		// ---take into account of how races played out between these 4
-		// ---teams with the undrawn teams to determine who is better/worse
-		// ---splitting them into a drawn group of 3 and 1 or two drawn groups
-		// ---of two.
-		// ---Yeah so, I'm not coding the 4 case draw for shit.
-		// ---Lob in an exception for this, relay info to user and telll them to
-		// ---"massage" the figures.
-
-		final var passTwo = new ArrayList<WinDsq>(passOne.size());
-		final List<Team> seedCheck = new ArrayList<>(3);
-		for (int i = 0, n = passOne.size(), idx = 0; i < n; i = idx) {
-			passTwo.clear();
-			final var current = passOne.get(i);
-			passTwo.add(current);
-			final var currentWeighting = current.weighting();
-			while (idx < n - 1 && currentWeighting == passOne.get(idx + 1).weighting()) {
-				// Add teams if they have the same weighting
-				idx ++;
-				passTwo.add(passOne.get(idx));
-			}
-
-			// We now have idx - i + 1 elements in passTwo with matching weightings
-			int numDrawnTeams = passTwo.size();
-			//TODO
-//			switch (numDrawnTeams) {
-//				case 1:
-//					continue;
-//				case 2:
-//				case 3:
-//				default:
+//		Map<Team, WinDsq> teamOrder = getTeamWinsAndDsqs();
+//
+//		// pass one - we have a built in weighting which we sort on giving approximate team standings
+//		final var passOne = teamOrder.values().stream()
+//				.sorted(Comparator.comparingInt(WinDsq::weighting))
+//				.collect(Collectors.toList());
+//
+//		// Second pass: traverse through the array and find drawing teams
+//		// -two drawing teams, single race:
+//		// ---see who won the race
+//		// -two drawing teams, 2 races:
+//		// ---see who won the races, if drawn require a rerun
+//		// -three drawing teams, single races (FIXME):
+//		// ---technically we need to rerun all these, but we can't risk a
+//		// ---repeat result (as it could continue forever. Instead we take the
+//		// ---highest seeded team as first and then check who won the race
+//		// ---between the two lower teams.
+//		// -three drawing teams, 2 races (FIXME):
+//		// ---Why the fuck do you even have a division with 4 teams in it?
+//		// ---Anyway, as above take the highest seeded, then compare the
+//		// ---lower teams. If they have drawn require a rerun.
+//		// -four drawing teams (surprisingly, possible in a group of 6) (TODO):
+//		// ---this is too complex for my poor brain. Basically you can
+//		// ---take into account of how races played out between these 4
+//		// ---teams with the undrawn teams to determine who is better/worse
+//		// ---splitting them into a drawn group of 3 and 1 or two drawn groups
+//		// ---of two.
+//		// ---Yeah so, I'm not coding the 4 case draw for shit.
+//		// ---Lob in an exception for this, relay info to user and telll them to
+//		// ---"massage" the figures.
+//
+//		final var passTwo = new ArrayList<WinDsq>(passOne.size());
+//		final List<Team> seedCheck = new ArrayList<>(3);
+//		for (int i = 0, n = passOne.size(), idx = 0; i < n; i = idx) {
+//			passTwo.clear();
+//			final var current = passOne.get(i);
+//			passTwo.add(current);
+//			final var currentWeighting = current.weighting();
+//			while (idx < n - 1 && currentWeighting == passOne.get(idx + 1).weighting()) {
+//				// Add teams if they have the same weighting
+//				idx ++;
+//				passTwo.add(passOne.get(idx));
 //			}
-//			idx++;
-			if (numDrawnTeams == 2) {
-				int whoWon;
-				try {
-					whoWon = whoWon(passTwo.get(i).team, passTwo.get(i + 1).team);
-				} catch (RaceNotRunException e) {
-					throw new RacesUnfinishedException(e);
-				}
-				if (whoWon < 0) {
-					passTwo[i] = passOne[i + 1];
-					passTwo[i + 1] = passOne[i];
-				} else if (whoWon == 0 && passTwo[i].compareTo(passTwo[i + 1]) > 0) {
-					// TODO Add rerace functionality here instead of seeding
-					passTwo[i] = passOne[i + 1];
-					passTwo[i + 1] = passOne[i];
-				}
-			} else if (numDrawnTeams == 3) {
-				seedCheck.clear();
-				for (int j = i; j < i + 3; j++) {
-					seedCheck.add(passTwo[j]);
-				}
+//
+//			// We now have idx - i + 1 elements in passTwo with matching weightings
+//			int numDrawnTeams = passTwo.size();
+//			//TODO
+////			switch (numDrawnTeams) {
+////				case 1:
+////					continue;
+////				case 2:
+////				case 3:
+////				default:
+////			}
+////			idx++;
+//			if (numDrawnTeams == 2) {
+//				int whoWon;
+//				try {
+//					whoWon = whoWon(passTwo.get(i).team, passTwo.get(i + 1).team);
+//				} catch (RaceNotRunException e) {
+//					throw new RacesUnfinishedException(e);
+//				}
+//				if (whoWon < 0) {
+//					passTwo[i] = passOne[i + 1];
+//					passTwo[i + 1] = passOne[i];
+//				} else if (whoWon == 0 && passTwo[i].compareTo(passTwo[i + 1]) > 0) {
+//					// TODO Add rerace functionality here instead of seeding
+//					passTwo[i] = passOne[i + 1];
+//					passTwo[i + 1] = passOne[i];
+//				}
+//			} else if (numDrawnTeams == 3) {
+//				seedCheck.clear();
+//				for (int j = i; j < i + 3; j++) {
+//					seedCheck.add(passTwo[j]);
+//				}
+//
+//				// Get the highest seed then the next two arbitrarily
+//				Collections.sort(seedCheck);
+//				passTwo[i] = seedCheck.get(0);
+//				passTwo[i + 1] = seedCheck.get(1);
+//				passTwo[i + 2] = seedCheck.get(2);
+//
+//				// See who won of the other two
+//				int whoWon;
+//				try {
+//					whoWon = whoWon(passTwo[i + 1], passTwo[i + 2]);
+//				} catch (RaceNotRunException e) {
+//					throw new RacesUnfinishedException(e);
+//				}
+//
+//				// Use teamOne as a temporary variable
+//				// Note: if whoWon > 0 then the teams are already in the correct order
+//				if (whoWon < 0) {
+//					tempTeam =  passTwo[i + 1];
+//					passTwo[i + 1] = passOne[i + 2];
+//					passTwo[i + 2] = tempTeam;
+//				} else if (whoWon == 0 && passTwo[i + 1].compareTo(passTwo[i + 2]) > 0) {
+//					// TODO Add rerace functionality here instead of seeding
+//					tempTeam =  passTwo[i + 1];
+//					passTwo[i + 1] = passOne[i + 2];
+//					passTwo[i + 2] = tempTeam;
+//				}
+//			} else if (numDrawnTeams > 3) {
+//				// More than 3 drawn teams throw exception
+//				throw new MarkBoothException(numDrawnTeams + " team draw, massage required");
+//			}
+//
+//		}
+//
+//		// We now have the ordered teams in passTwo, just put them into teamOrder
+//		teamOrder.clear();
+//		for (int i = 0, n = passTwo.length; i < n; i++) {
+//			teamOrder.add(passTwo[i]);
+//		}
+//		return teamOrder;
 
-				// Get the highest seed then the next two arbitrarily
-				Collections.sort(seedCheck);
-				passTwo[i] = seedCheck.get(0);
-				passTwo[i + 1] = seedCheck.get(1);
-				passTwo[i + 2] = seedCheck.get(2);
-
-				// See who won of the other two
-				int whoWon;
-				try {
-					whoWon = whoWon(passTwo[i + 1], passTwo[i + 2]);
-				} catch (RaceNotRunException e) {
-					throw new RacesUnfinishedException(e);
-				}
-
-				// Use teamOne as a temporary variable
-				// Note: if whoWon > 0 then the teams are already in the correct order
-				if (whoWon < 0) {
-					tempTeam =  passTwo[i + 1];
-					passTwo[i + 1] = passOne[i + 2];
-					passTwo[i + 2] = tempTeam;
-				} else if (whoWon == 0 && passTwo[i + 1].compareTo(passTwo[i + 2]) > 0) {
-					// TODO Add rerace functionality here instead of seeding
-					tempTeam =  passTwo[i + 1];
-					passTwo[i + 1] = passOne[i + 2];
-					passTwo[i + 2] = tempTeam;
-				}
-			} else if (numDrawnTeams > 3) {
-				// More than 3 drawn teams throw exception
-				throw new MarkBoothException(numDrawnTeams + " team draw, massage required");
-			}
-
-		}
-
-		// We now have the ordered teams in passTwo, just put them into teamOrder
-		teamOrder.clear();
-		for (int i = 0, n = passTwo.length; i < n; i++) {
-			teamOrder.add(passTwo[i]);
-		}
-		return teamOrder;
+		return null;
 	}
 
 	// TODO Move to utility group
@@ -379,7 +381,8 @@ public class RaceGroup {
 		int unrunRaces = 0;
 		// FIXME
 		for (int i = 0, n = this.matches.size(); i < n; i++) {
-			Match match = this.matches.get(i);
+//			Match match = this.matches.get(i);
+			Match match = null;
 			// TODO sort out duplicated code
 			// FIXME for above???
 			if (match.getTeamOne() == teamOne && match.getTeamTwo() == teamTwo) {
