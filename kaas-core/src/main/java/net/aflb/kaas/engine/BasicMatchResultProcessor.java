@@ -41,7 +41,7 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
 
     @Override
     public List<Team> getResults(final List<Match<?>> matches)
-            // TODO return enum instead of throw exception?
+        // TODO return enum instead of throw exception?
             throws ManualInterventionException, RacesUnfinishedException {
         if (matches.stream().anyMatch(m -> !m.isComplete())) {
             throw new RacesUnfinishedException("There are still incomplete races");
@@ -81,10 +81,10 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
         final var passTwo = new ArrayList<WinDsq>(passOne.size());
         final List<Team> seedCheck = new ArrayList<>(3);
         for (int i = 0, n = passOne.size(), idx = 0; i < n; i = idx) {
-            passTwo.clear();
             final var current = passOne.get(i);
             passTwo.add(current);
             final var currentWeighting = current.weighting();
+
             while (idx < n - 1 && currentWeighting == passOne.get(idx + 1).weighting()) {
                 // Add teams if they have the same weighting
                 idx++;
@@ -92,7 +92,7 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
             }
 
             // We now have idx - i + 1 elements in passTwo with matching weightings
-            int numDrawnTeams = passTwo.size();
+            int numDrawnTeams = idx - i + 1;
             //TODO
 //			switch (numDrawnTeams) {
 //				case 1:
@@ -153,6 +153,7 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
                 throw new ManualInterventionException(numDrawnTeams + " team draw, massage required");
             }
 
+            idx++;
         }
 
         return passTwo.stream()

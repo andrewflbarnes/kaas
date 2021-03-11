@@ -19,8 +19,10 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -171,6 +173,19 @@ class SetOneMatchGeneratorTest {
 //                log.info("{} : {} v {} {}", match.getKassId(), match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner()));
 
         final MatchResultProcessor mrp = new BasicMatchResultProcessor();
+
+        // Fake results
+        final Set<Team> winTeams = new HashSet<>();
+        matchList.forEach(m -> {
+            if (winTeams.contains(m.getTeamOne())) {
+                m.setWinner(Match.Winner.ONE);
+            } else if (winTeams.contains(m.getTeamTwo())) {
+                m.setWinner(Match.Winner.TWO);
+            } else {
+                m.setWinner(Match.Winner.ONE);
+                winTeams.add(m.getTeamOne());
+            }
+        });
 
 
         for (Round division : divisions) {
