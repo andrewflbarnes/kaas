@@ -110,7 +110,7 @@ class SetOneMatchGeneratorTest {
 
 //        result.forEach(m -> log.info("{} v {}", m.getTeamOne().name(), m.getTeamTwo().name()));
 
-        log.info("{}", round.debug());
+        log.info("ROUND DEBUG\n{}", round.debug());
 //        print(round, ">");
 
         // Assume the kings implementation for now
@@ -188,15 +188,12 @@ class SetOneMatchGeneratorTest {
         });
 
 
+        log.info("SET 1 RESULTS");
         for (Round division : divisions) {
             for (Round minileague : division.subRounds()) {
-                String msg = "%s->%s".formatted(division.name(), minileague.name());
-                try {
-                    final List<Team> teamResults = mrp.getResults(minileague.matches());
-                    teamResults.forEach(t -> log.info("{}->{}", msg, t.name()));
-                } catch (ManualInterventionException | RacesUnfinishedException e) {
-                    log.warn("{}->{}", msg, e.getMessage());
-                }
+                final String msg = "%s->%s".formatted(division.name(), minileague.name());
+                final List<Team> teamResults = mrp.getResults(minileague.matches());
+                teamResults.forEach(t -> log.info("{}->{}", msg, t.name()));
             }
         }
     }

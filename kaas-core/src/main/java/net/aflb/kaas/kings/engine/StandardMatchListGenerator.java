@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO rename to PartitionedMatchListGenerator?
+// TODO define a nesting level so this i more generic?
 public class StandardMatchListGenerator implements MatchListGenerator {
     @Override
     public List<Match<?>> generate(Round set) {

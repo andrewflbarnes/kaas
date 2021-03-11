@@ -1,8 +1,8 @@
 package net.aflb.kaas.engine;
 
-import lombok.RequiredArgsConstructor;
 import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
+import net.aflb.kaas.core.model.competing.WinDsq;
 import net.aflb.kaas.core.spi.ManualInterventionException;
 import net.aflb.kaas.core.spi.MatchResultProcessor;
 import net.aflb.kaas.core.spi.RaceNotFoundException;
@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class BasicMatchResultProcessor implements MatchResultProcessor {
@@ -22,17 +23,7 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
     private static final int WEIGHT_DSQ = 10;
     private static final int WEIGHT_ADJUSTMENT = 1;
 
-    @RequiredArgsConstructor
-    private static class WinDsq {
-        private final Team team;
-        private int wins = 0;
-        private int dsqs = 0;
-        private int adjustments = 0;
-
-        int weighting() {
-            return WEIGHT_WIN * wins - WEIGHT_DSQ * dsqs + WEIGHT_ADJUSTMENT * adjustments;
-        }
-    }
+    private static final Function<Team, WinDsq> WIN_DSQ = WinDsq.factory();
 
     // TODO get from apache commons or similar
     private static boolean isEmpty(final String test) {
@@ -103,16 +94,17 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
 //			}
 //			idx++;
             if (numDrawnTeams == 2) {
-                int whoWon;
+                final WinDsq whoWon;
                 try {
                     whoWon = whoWon(matches, passTwo.get(i), passTwo.get(i + 1));
                 } catch (RaceNotRunException e) {
                     throw new RacesUnfinishedException(e);
                 }
-                if (whoWon == 0) {
-                    throw new ManualInterventionException("tiebrreaker required");
+                if (whoWon == null) {
+                    throw new ManualInterventionException("tiebreaker required");
                     // TODO we need to run a tiebreaker race (or hacky set by seeding which isn't recommended)
                 }
+                whoWon.addAdjustment();
             } else if (numDrawnTeams == 3) {
                 throw new ManualInterventionException(numDrawnTeams + " team draw, massage required");
                 // TODO
@@ -157,7 +149,7 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
         }
 
         return passTwo.stream()
-                .map(wd -> wd.team)
+                .map(WinDsq::getTeam)
                 .collect(Collectors.toList());
     }
 
@@ -170,21 +162,21 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
             final Team teamTwo = match.getTeamTwo();
 
             // init if not yet added
-            teamWinsAndDsqs.computeIfAbsent(teamOne, WinDsq::new);
-            teamWinsAndDsqs.computeIfAbsent(teamTwo, WinDsq::new);
+            teamWinsAndDsqs.computeIfAbsent(teamOne, WIN_DSQ);
+            teamWinsAndDsqs.computeIfAbsent(teamTwo, WIN_DSQ);
 
             // Update wins
             final var winner = match.getWinner();
             if (winner != null) {
-                teamWinsAndDsqs.get(winner).wins += 1;
+                teamWinsAndDsqs.get(winner).addWin();
             }
 
             // Update the DSQs if appropriate
             if (!isEmpty(match.getTeamOneDsq())) {
-                teamWinsAndDsqs.get(teamOne).dsqs += 1;
+                teamWinsAndDsqs.get(teamOne).addDsq();
             }
             if (!isEmpty(match.getTeamTwoDsq())) {
-                teamWinsAndDsqs.get(teamTwo).dsqs += 1;
+                teamWinsAndDsqs.get(teamTwo).addDsq();
             }
 
         });
@@ -211,9 +203,10 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
      * @throws RaceNotRunException if there is a race between the two teams which has yet to be
      *                             completed
      */
-    private int whoWon(final List<Match<?>> matches, final WinDsq wdOne, final WinDsq wdTwo) throws RaceNotRunException {
-        final var teamOne = wdOne.team;
-        final var teamTwo = wdTwo.team;
+    @Override
+    public WinDsq whoWon(final List<Match<?>> matches, final WinDsq wdOne, final WinDsq wdTwo) throws RaceNotRunException {
+        final var teamOne = wdOne.getTeam();
+        final var teamTwo = wdTwo.getTeam();
         // We keep track of the return value as in some cases teams can race
         // each other multiple times in a single set
         int retval = 0;
@@ -268,13 +261,11 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
         }
 
         if (retval > 0) {
-            wdOne.adjustments = 1;
-            wdOne.adjustments = 0;
+            return wdOne;
         } else if (retval < 0) {
-            wdOne.adjustments = 0;
-            wdOne.adjustments = 1;
+            return wdTwo;
+        } else {
+            return null;
         }
-
-        return retval;
     }
 }
