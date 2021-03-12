@@ -44,11 +44,6 @@ import java.util.Map;
  * </p>
  *
  * <p>
- * Note that this class is package-private and should be utilised through the
- * {@link RaceConfigurer#generateRaces(Round, int, boolean)} method.
- * </p>
- *
- * <p>
  * When executed this task retrieves all clubs under the current set league from
  * the database. For each division it then retrieves all competing teams
  * (creating those which don't already exist), ordering by highest seeded first

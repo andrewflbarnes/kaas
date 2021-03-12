@@ -10,7 +10,6 @@ import net.aflb.kaas.core.spi.RaceNotRunException;
 import net.aflb.kaas.core.spi.RacesUnfinishedException;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,6 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
 
     private static final int WEIGHT_WIN = 100;
     private static final int WEIGHT_DSQ = 10;
-    private static final int WEIGHT_ADJUSTMENT = 1;
 
     private static final Function<Team, WinDsq> WIN_DSQ = WinDsq.factory();
 
@@ -71,7 +69,6 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
         // ---"massage" the figures.
 
         final var passTwo = new ArrayList<WinDsq>(passOne.size());
-        final List<Team> seedCheck = new ArrayList<>(3);
         for (int i = 0, n = passOne.size(), idx = 0; i < n; i = idx) {
             final var current = passOne.get(i);
             passTwo.add(current);
@@ -157,7 +154,6 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
     private Map<Team, WinDsq> getTeamWinsAndDsqs(final List<Match<?>> matches) {
         final Map<Team, WinDsq> teamWinsAndDsqs = new HashMap<>(6);
 
-        // FIXME - what if we're not complete? NPE central!
         matches.forEach(match -> {
             final Team teamOne = match.getTeamOne();
             final Team teamTwo = match.getTeamTwo();

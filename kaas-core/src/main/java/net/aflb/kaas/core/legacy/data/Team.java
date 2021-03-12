@@ -8,7 +8,8 @@ package net.aflb.kaas.core.legacy.data;
  *
  * @author Barnesly
  */
-public class Team implements Comparable<Team> {
+public class
+Team implements Comparable<Team> {
     private int teamId;
     private String league;
     private String clubName;

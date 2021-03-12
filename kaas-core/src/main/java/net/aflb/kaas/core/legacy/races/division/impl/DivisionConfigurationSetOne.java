@@ -223,7 +223,7 @@ public class DivisionConfigurationSetOne implements DivisionConfiguration {
 					GroupConfiguration.FOUR, GroupConfiguration.FOUR };
 			break;
 		default:
-			throw new InvalidNumberOfTeamsException("Too many/few teams (" + String.valueOf(numTeams) + ")");
+			throw new InvalidNumberOfTeamsException("Too many/few teams (" + numTeams + ")");
 		}
 
 		switch (this.groupGrid.length) {

@@ -1,7 +1,6 @@
 package net.aflb.kaas.kings.engine;
 
 import lombok.extern.slf4j.Slf4j;
-import net.aflb.kaas.core.legacy.races.RaceConfigurer;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration.InvalidNumberOfTeamsException;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetOne;
@@ -28,11 +27,6 @@ import java.util.stream.Stream;
  * Class for creating the initial configuration and races based on the settings
  * for each {@link Club} as set in the database. This is a somewhat intensive
  * task and as runs in its own thread.
- * </p>
- *
- * <p>
- * Note that this class is package-private and should be utilised through the
- * {@link RaceConfigurer#generateRaces} method.
  * </p>
  *
  * <p>
@@ -73,12 +67,13 @@ public class SetOneMatchGenerator implements MatchGenerator {
         round.subRounds().add(set1);
 
         // Create the race groups and races for each division
-        // TODO something better?
         final var divisions = competingTeams.keySet().stream()
                 .sorted(Division.BY_RANK)
                 .collect(Collectors.toList());
+
         for (final var division : divisions) {
             final var teams = competingTeams.get(division);
+            // TODO do we need to sort teams here? If so should we look at something like seeding?
             Collections.sort(teams);
             log.debug("{} competing seeds", division.name());
             teams.forEach(team -> log.debug("{}", team.name()));
@@ -176,18 +171,17 @@ public class SetOneMatchGenerator implements MatchGenerator {
      */
     public List<RaceGroup> generateRaceGroupMap(List<Team> competingTeams) throws InvalidNumberOfTeamsException {
         // Initialise the Map we are returning
-        // FIXME??? Was android ArrayMap
-        Map<String, RaceGroup> raceGroups = new HashMap<>();
+        final Map<String, RaceGroup> raceGroups = new HashMap<>();
 
-        DivisionConfiguration config = new DivisionConfigurationSetOne(competingTeams.size());
-        String[] groupNames = config.getGroupNames();
-        GroupConfiguration[] groupGrid = config.getGroupGrid();
+        final DivisionConfiguration config = new DivisionConfigurationSetOne(competingTeams.size());
+        final String[] groupNames = config.getGroupNames();
+        final GroupConfiguration[] groupGrid = config.getGroupGrid();
 
         // Create each of the current race groups
         for (int i = 0, n = groupNames.length; i < n; i++) {
             log.debug("creating race group " + groupNames[i]);
 
-            RaceGroup group = new RaceGroup(groupNames[i], new ArrayList<>(), groupGrid[i], 999 /* this.control.id() */, THIS_ROUND_NO);
+            final RaceGroup group = new RaceGroup(groupNames[i], new ArrayList<>(), groupGrid[i], 999 /* this.control.id() */, THIS_ROUND_NO);
             raceGroups.put(groupNames[i], group);
         }
 

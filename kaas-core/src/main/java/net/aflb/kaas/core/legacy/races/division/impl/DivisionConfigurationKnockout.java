@@ -6,10 +6,17 @@ package net.aflb.kaas.core.legacy.races.division.impl;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
 
-/**
- * @author Barnesly.
- */
 public class DivisionConfigurationKnockout implements DivisionConfiguration {
+    private static final String NAME_12 = "1st/2nd";
+    private static final String NAME_34 = "3rd/4th";
+    private static final String NAME_56 = "5th/6th";
+    private static final String NAME_78 = "7th/8th";
+    private static final String NAME_0910 = "9th/10th";
+    private static final String NAME_1112 = "11th/12th";
+    private static final String NAME_1314 = "13th/14th";
+    private static final String NAME_1516 = "15th/16th";
+    private static final String NAME_1718 = "17th/18th";
+    private static final String NAME_1920 = "19th/20th";
 
     private GroupConfiguration[] groupGrid;
     private String[] groupNames;
@@ -38,7 +45,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
     public void setTeams(int numTeams) throws InvalidNumberOfTeamsException {
 
         if (numTeams < 4 || numTeams > 32) {
-            throw new InvalidNumberOfTeamsException("Too many/few teams (" + String.valueOf(numTeams) + ")");
+            throw new InvalidNumberOfTeamsException("Too many/few teams (" + numTeams + ")");
         }
 
         switch (numTeams) {
@@ -220,60 +227,60 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
         switch (this.groupGrid.length) {
         case 2:
             this.groupNames = new String[] {
-                    "1st/2nd", "3rd/4th"
+                    NAME_12, NAME_34
             };
             break;
         case 3:
             this.groupNames = new String[] {
-                    "1st/2nd", "3rd/4th",
-                    "5th/6th"
+                    NAME_12, NAME_34,
+                    NAME_56
             };
             break;
         case 4:
             this.groupNames = new String[] {
-                    "1st/2nd", "3rd/4th",
-                    "5th/6th", "7th/8th"
+                    NAME_12, NAME_34,
+                    NAME_56, NAME_78
             };
             break;
         case 6:
             this.groupNames = new String[] {
-                    "1st/2nd", "3rd/4th",
-                    "5th/6th", "7th/8th",
-                    "9th/10th", "11th/12th"
+                    NAME_12, NAME_34,
+                    NAME_56, NAME_78,
+                    NAME_0910, NAME_1112
             };
             break;
         case 7:
             this.groupNames = new String[] {
-                    "1st/2nd", "3rd/4th",
-                    "5th/6th", "7th/8th",
-                    "9th/10th", "11th/12th",
-                    "13th/14th",
+                    NAME_12, NAME_34,
+                    NAME_56, NAME_78,
+                    NAME_0910, NAME_1112,
+                    NAME_1314,
             };
             break;
         case 8:
             this.groupNames = new String[] {
-                    "1st/2nd", "3rd/4th",
-                    "5th/6th", "7th/8th",
-                    "9th/10th", "11th/12th",
-                    "13th/14th", "15th/16th"
+                    NAME_12, NAME_34,
+                    NAME_56, NAME_78,
+                    NAME_0910, NAME_1112,
+                    NAME_1314, NAME_1516
             };
             break;
         case 9:
             this.groupNames = new String[] {
-                    "1st/2nd", "3rd/4th",
-                    "5th/6th", "7th/8th",
-                    "9th/10th", "11th/12th",
-                    "3th/14th", "15th/16th",
-                    "16th/18th"
+                    NAME_12, NAME_34,
+                    NAME_56, NAME_78,
+                    NAME_0910, NAME_1112,
+                    NAME_1314, NAME_1516,
+                    NAME_1718
             };
             break;
         case 10:
             this.groupNames = new String[] {
-                    "1st/2nd", "3rd/4th",
-                    "5th/6th", "7th/8th",
-                    "9th/10th", "11th/12th",
-                    "3th/14th", "15th/16th",
-                    "16th/18th", "19th/20th"
+                    NAME_12, NAME_34,
+                    NAME_56, NAME_78,
+                    NAME_0910, NAME_1112,
+                    NAME_1314, NAME_1516,
+                    NAME_1718, NAME_1920
             };
             break;
         default:

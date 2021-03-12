@@ -16,7 +16,6 @@ public record Division(
     public static final Division NONE = Division.of("NONE", 999);
 
     public static Division of(final String name, final int rank) {
-        // FIXME
         return new Division(GEN.get(), name, rank);
     }
 

@@ -12,7 +12,6 @@ public record League(
     private static final Supplier<KaasID> GEN = KaasID.generator(League.class);
 
     public static League of(final String name) {
-        // FIXME
         return new League(GEN.get(), name);
     }
 

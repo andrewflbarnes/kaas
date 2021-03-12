@@ -1,7 +1,6 @@
 package net.aflb.kaas.core.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,7 +82,6 @@ public class Registry {
         return this;
     }
 
-    // TODO cache?
     private Map<Club, Set<Team>> clubs() {
         return leagues.values().stream()
                 .flatMap(clubs -> clubs.entrySet().stream())

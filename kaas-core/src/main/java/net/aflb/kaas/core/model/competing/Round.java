@@ -34,7 +34,6 @@ public record Round(
 
     public static Round of(final boolean virtual, final String name, final Map<Division, List<Team>> seeds, final League league) {
         return new Round(
-                // FIXME
                 GEN.get(),
                 new Date(),
                 name,

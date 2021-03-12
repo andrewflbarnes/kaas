@@ -3,14 +3,9 @@
  */
 package net.aflb.kaas.core.legacy.races.group;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
-import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.Team;
-
-// TODO Move the important methods of this out to an interface
+import net.aflb.kaas.core.model.competing.Match;
 
 /**
  * <p>
@@ -66,8 +61,8 @@ public class GroupConfiguration {
 			{ { 4, 5 }, { 3, 1 }, { 4, 6 }, { 5, 2 }, { 1, 4 } },
 			{ { 2, 6 }, { 3, 5 }, { 5, 1 }, { 4, 2 }, { 6, 3 } } });
 
-	private String value;
-	private int[][][] raceGrid;
+	private final String value;
+	private final int[][][] raceGrid;
 
 	/**
 	 * The constructor
@@ -83,30 +78,12 @@ public class GroupConfiguration {
 		this.value = value;
 		this.raceGrid = raceGrid;
 	}
-
-	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * @return the total number of races under this configuration
-	 */
-	public int raceCount() {
-		return raceGrid[0].length + raceGrid[1].length + raceGrid[2].length;
-	}
-
 	/**
 	 * @return the number of teams competing under this configuration
 	 */
 	public int teamCount() {
 		return Integer.parseInt(this.value.substring(0, 1));
 	}
-
-	// TODO replace use of the below method with something along the lines of
-	// getNoRaces(int segment)
 
 	/**
 	 * @return the multi-dimensional numeric array defining the races which will
@@ -115,56 +92,4 @@ public class GroupConfiguration {
 	public int[][][] getRaceGrid() {
 		return this.raceGrid;
 	}
-
-	/**
-	 * <p>
-	 * The method which generates the list of {@link Match}es which this group's
-	 * {@link Team}s will compete in.
-	 * </p>
-	 *
-	 * <p>
-	 * <b>IMPORTANT!</b> To prevent issues with team overlap, the returned list
-	 * should not be reordered.
-	 * </p>
-	 *
-	 * @param controlId
-	 *            the control ID associated with these races
-	 * @param roundNo
-	 *            the round number associated with these races
-	 * @param group
-	 *            the name of the group that these races are identified by
-	 * @param teams
-	 *            the list of {@link Team}s which will be competing in the races
-	 * @return the list of {@link Match}es the teams will be competing in
-	 */
-	public List<Match> createRaces(long controlId, long roundNo, String group,
-			List<Team> teams) {
-		List<Match> races = new ArrayList<>();
-//		String division = teams.get(0).getDivision();
-
-		for (int i = 0; i < raceGrid.length; i++) {
-			for (int j = 0; j < raceGrid[i].length; j++) {
-				Match race = Match.of(teams.get(raceGrid[i][j][0] - 1),teams.get(raceGrid[i][j][1] - 1));
-//				race.setControlId(controlId);
-//				race.setDivision(division);
-//				race.setGroup(group);
-//				race.setRoundNo(roundNo);
-//				// the raceGrid is human readable (i.e. 1 indexed) so we must
-//				// take 1 off when determining which listed team is competing
-//				race.setTeamOne(teams.get(raceGrid[i][j][0] - 1).getTeamId());
-//				race.setTeamTwo(teams.get(raceGrid[i][j][1] - 1).getTeamId());
-
-				races.add(race);
-
-				log.debug(
-						"race added for control id " + controlId
-								+ ", division " + "{division}" + ", round number "
-								+ roundNo + ", teams " + race.getTeamOne().name()
-								+ " " + race.getTeamTwo().name());
-			}
-		}
-
-		return races;
-	}
-
 }

@@ -1,7 +1,6 @@
 package net.aflb.kaas.kings.engine;
 
 import lombok.extern.slf4j.Slf4j;
-import net.aflb.kaas.core.legacy.races.RaceConfigurer;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration.InvalidNumberOfTeamsException;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetTwo;
@@ -27,11 +26,6 @@ import java.util.stream.Stream;
  * Class for creating the initial configuration and Matchs based on the settings
  * for each {@link Club} as set in the database. This is a somewhat intensive
  * task and as runs in its own thread.
- * </p>
- *
- * <p>
- * Note that this class is package-private and should be utilised through the
- * {@link RaceConfigurer#generateRaces(Round, int, boolean)} method.
  * </p>
  *
  * <p>

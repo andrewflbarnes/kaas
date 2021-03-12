@@ -409,7 +409,7 @@ public class DivisionConfigurationSetTwo implements DivisionConfiguration {
 					{"4E", "4F", "4G", "4H"}};
 			break;
 		default:
-            throw new InvalidNumberOfTeamsException("Too many/few teams (" + String.valueOf(numTeams) + ")");
+            throw new InvalidNumberOfTeamsException("Too many/few teams (" + numTeams + ")");
 		}
 
 		switch (this.groupGrid.length) {
