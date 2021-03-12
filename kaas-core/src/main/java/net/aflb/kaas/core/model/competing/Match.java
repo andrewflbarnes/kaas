@@ -14,7 +14,7 @@ public class Match<T> {
         ONE, TWO;
     }
 
-    private final KaasID kassId;
+    private final KaasID id;
     private final Team teamOne;
     private final Team teamTwo;
     private String teamOneDsq = null;
@@ -27,10 +27,6 @@ public class Match<T> {
                 GEN.get(),
                 teamOne,
                 teamTwo);
-    }
-
-    public long getId() {
-        return kassId.hashCode();
     }
 
     public void setWinner(final Winner winner) {

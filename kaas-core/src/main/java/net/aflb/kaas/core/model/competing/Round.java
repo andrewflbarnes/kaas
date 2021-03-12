@@ -1,5 +1,7 @@
 package net.aflb.kaas.core.model.competing;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.aflb.kaas.core.KaasID;
 import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.League;
 import net.aflb.kaas.core.model.Team;
@@ -10,10 +12,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public record Round(
-        long id,
+        KaasID id,
         Date date,
         String name,
         League league,
@@ -27,12 +30,13 @@ public record Round(
         List<Round> subRounds,
         List<Match<?>> matches
 ) {
+    private static final Supplier<KaasID> GEN = KaasID.generator(Round.class);
     private static final String DEBUG_PREFIX = ">";
 
     public static Round of(final boolean virtual, final String name, final Map<Division, List<Team>> seeds, final League league) {
         return new Round(
                 // FIXME
-                System.currentTimeMillis(),
+                GEN.get(),
                 new Date(),
                 name,
                 league,

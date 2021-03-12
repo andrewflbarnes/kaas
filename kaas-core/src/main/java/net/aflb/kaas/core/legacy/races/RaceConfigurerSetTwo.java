@@ -473,7 +473,6 @@ class RaceConfigurerSetTwo /* extends AsyncTask<Void, String, Boolean> */ {
 		String[][] transformationMapping = config.getTransformationMapping();
 		String[] groupNames = config.getGroupNames();
 		GroupConfiguration[] groupGrid = config.getGroupGrid();
-        long controlId = this.control.id();
 
 		// Initialise the map we are returning
 		// FIXME was ArrayMap
@@ -497,7 +496,7 @@ class RaceConfigurerSetTwo /* extends AsyncTask<Void, String, Boolean> */ {
 
 			// Create a new RageGroup and add the teams who are competing to it
 			RaceGroup group = new RaceGroup(groupNames[i],
-					teams, groupGrid[i], controlId, this.MatchSetNo);
+					teams, groupGrid[i], 999, this.MatchSetNo);
 
 			// Add the group to the map
 			raceGroups.put(groupNames[i], group);

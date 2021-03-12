@@ -159,7 +159,7 @@ public class KingsRaceEngine implements RaceEngine {
         for (int i = 0, n = groupNames.length; i < n; i++) {
             log.debug("creating race group " + groupNames[i]);
 
-            RaceGroup group = new RaceGroup(groupNames[i], new ArrayList<Team>(), groupGrid[i], control.id(), 1);
+            RaceGroup group = new RaceGroup(groupNames[i], new ArrayList<Team>(), groupGrid[i], 999, 1);
             raceGroups.put(groupNames[i], group);
         }
 
@@ -498,7 +498,6 @@ public class KingsRaceEngine implements RaceEngine {
         String[][] transformationMapping = config.getTransformationMapping();
         String[] groupNames = config.getGroupNames();
         GroupConfiguration[] groupGrid = config.getGroupGrid();
-        long controlId = control.id();
 
         // Initialise the map we are returning
         // FIXME??? Was using android ArrayMap
@@ -522,7 +521,7 @@ public class KingsRaceEngine implements RaceEngine {
 
             // Create a new RageGroup and add the teams who are competing to it
             RaceGroup group = new RaceGroup(groupNames[i],
-                    teams, groupGrid[i], controlId, raceSetNo);
+                    teams, groupGrid[i], 999, raceSetNo);
 
             // Add the group to the map
             raceGroups.put(groupNames[i], group);

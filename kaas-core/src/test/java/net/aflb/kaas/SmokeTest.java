@@ -1,8 +1,6 @@
 package net.aflb.kaas;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.model.Club;
 import net.aflb.kaas.core.model.Division;
@@ -280,18 +278,10 @@ class SmokeTest {
             }
         }
 
-        // Example of OM ignoring methods for normalization
-        final ObjectMapper om = new ObjectMapper().deactivateDefaultTyping();
-        om.setVisibility(om.getSerializationConfig().getDefaultVisibilityChecker()
-                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withFieldVisibility(JsonAutoDetect.Visibility.ANY));
-        SimpleModule sm = new SimpleModule();
-        sm.addSerializer(Team.class, JacksonSerializationUtils.normalizer(t -> t.id().id()));
-        om.registerModule(sm);
+        // Check serialization normalisation manually
+        final ObjectMapper om = JacksonSerializationUtils.normalisedObjectMapper();
         log.info(om.writerWithDefaultPrettyPrinter().writeValueAsString(set1));
+        // TODO check deserialization
     }
 
 }
