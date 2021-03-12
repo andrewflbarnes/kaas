@@ -184,10 +184,6 @@ class SmokeTest {
         final var matchList = matchListGenerator.generate(set1);
         assertEquals(24, matchList.size());
 
-//        log.info("RACELIST %s".formatted(set.name()));
-//        matchList.forEach(match ->
-//                log.info("{} : {} v {} {}", match.getKassId(), match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner()));
-
         // Fake results
         final Set<Team> winTeams = new HashSet<>();
         matchList.forEach(mm -> {
@@ -204,6 +200,14 @@ class SmokeTest {
 
         assertTrue(set1.isComplete());
         assertTrue(round.isComplete());
+
+
+        log.info("RACELIST %s".formatted(set1.name()));
+        for (int i = 0; i < matchList.size(); i++) {
+            final var mm = matchList.get(i);
+            final var match = mm.getMatch();
+            log.info("{} {} {} : {} v {} ({})", mm.getDivision().name(), mm.getMinileague(), i + 1, match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner().name());
+        }
 
         log.info("SET 1 RESULTS");
         final MatchResultProcessor mrp = new BasicMatchResultProcessor();
@@ -264,7 +268,7 @@ class SmokeTest {
         for (int i = 0; i < matchList2.size(); i++) {
             final var mm = matchList2.get(i);
             final var match = mm.getMatch();
-            log.info("{} {} : {} v {} ({})", mm.getDivision().name(), i + 1, match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner().name());
+            log.info("{} {} {} : {} v {} ({})", mm.getDivision().name(), mm.getMinileague(), i + 1, match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner().name());
         }
 
         assertTrue(set2.isComplete());

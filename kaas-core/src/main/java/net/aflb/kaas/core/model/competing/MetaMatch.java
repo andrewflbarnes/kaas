@@ -11,11 +11,13 @@ import net.aflb.kaas.core.model.League;
 public class MetaMatch {
     private final League league;
     private final Division division;
+    private final String minileague;
     private final Match<?> match;
 
-    public MetaMatch(final League league, final Division division, final Match<?> match) {
+    public MetaMatch(final League league, final Division division, final String minileague, final Match<?> match) {
         this.league = league;
         this.division = division;
+        this.minileague = minileague;
         this.match = match;
     }
 }
