@@ -15,11 +15,13 @@ import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.spi.MatchGenerator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -96,8 +98,13 @@ public class SetOneMatchGenerator implements MatchGenerator {
                 final var setDivisionMinileague = Round.of(true, groupName, groupTeams, round.league());
                 final var partitions = g.getMatches();
                 for (int i = 0; i < partitions.size(); i++) {
-                    // TODO set partition teams properly (we could reduce over matches but this seems ugly...)
-                    final var partitionTeams = groupTeams;
+                    // TODO nicer way to do this?
+                    final var partitionTeams = Collections.singletonMap(division, g.getMatches()
+                            .stream()
+                            .flatMap(Collection::stream)
+                            .flatMap(m -> Stream.of(m.getTeamOne(), m.getTeamTwo()))
+                            .distinct()
+                            .collect(Collectors.toList()));
                     final var setDivisionMinileaguePartition = Round.of(
                             false, "%s partition %d".formatted(groupName, i + 1), partitionTeams, round.league());
                     setDivisionMinileaguePartition.matches().addAll(partitions.get(i));
