@@ -122,7 +122,6 @@ public class SetTwoMatchGenerator implements MatchGenerator {
                 throw new RuntimeException(e);
             }
             raceGroupMap.values().forEach(g -> {
-                // -1 is not a real section as this value is currently ignored
                 final var groupName = g.getGroupName();
                 final var groupTeams = Collections.singletonMap(division, g.getTeams());
                 final var setDivisionMinileague = Round.of(true, groupName, groupTeams, round.league());

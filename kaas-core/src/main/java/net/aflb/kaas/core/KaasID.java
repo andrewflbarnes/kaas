@@ -1,14 +1,43 @@
 package net.aflb.kaas.core;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+@JsonDeserialize(using = KaasID.IdDeserializer.class)
 public record KaasID(
         String id
 ) {
     private static final Set<String> REGISTERED = new HashSet<>();
+
+    public static class IdDeserializer extends StdDeserializer<KaasID> {
+        public IdDeserializer() {
+            this(null);
+        }
+
+        public IdDeserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        @Override
+        public KaasID deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+            return new KaasID(jsonParser.getText());
+        }
+    }
+
+    @JsonValue
+    public String id() {
+        return id;
+    }
 
     /**
      * This is intended to be used in static initializers.

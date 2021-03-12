@@ -1,9 +1,17 @@
 package net.aflb.kaas;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.extern.slf4j.Slf4j;
-import net.aflb.kaas.core.model.*;
+import net.aflb.kaas.core.model.Club;
+import net.aflb.kaas.core.model.Division;
+import net.aflb.kaas.core.model.League;
+import net.aflb.kaas.core.model.Registry;
+import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.competing.Round;
+import net.aflb.kaas.core.serialization.JacksonSerializationUtils;
 import net.aflb.kaas.core.spi.MatchResultProcessor;
 import net.aflb.kaas.engine.BasicMatchResultProcessor;
 import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
@@ -11,9 +19,17 @@ import net.aflb.kaas.kings.engine.SetTwoMatchGenerator;
 import net.aflb.kaas.kings.engine.StandardMatchListGenerator;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class SmokeTest {
@@ -22,7 +38,7 @@ class SmokeTest {
     void test() throws Exception {
         final Registry registry = new Registry();
         final League league = League.of("Northern");
-        final Division division1 = Division.of("Mixed",1);
+        final Division division1 = Division.of("Mixed", 1);
         final Division division2 = Division.of("Ladies", 2);
         final Club club1 = Club.of("Kings");
         Team team11 = Team.of("Kings 1");
@@ -205,24 +221,24 @@ class SmokeTest {
 
         assertEquals(2, round.subRounds().size());
         // check set 2
-        final var set2 =  round.subRounds().get(1);
+        final var set2 = round.subRounds().get(1);
         assertEquals(24, set2.matches().size());
 
         // check each division in set 2
         assertEquals(2, set2.subRounds().size());
-        final var set2div1 =  set2.subRounds().get(0);
+        final var set2div1 = set2.subRounds().get(0);
         assertEquals(2, set2div1.subRounds().size());
-        final var set2div2 =  set2.subRounds().get(1);
+        final var set2div2 = set2.subRounds().get(1);
         assertEquals(2, set2div2.subRounds().size());
 
         // check each minileague in each division in set 2
-        final var set2div1ml1 =  set2div1.subRounds().get(0);
+        final var set2div1ml1 = set2div1.subRounds().get(0);
         assertEquals(3, set2div1ml1.subRounds().size());
-        final var set2div1ml2 =  set2div1.subRounds().get(1);
+        final var set2div1ml2 = set2div1.subRounds().get(1);
         assertEquals(3, set2div1ml2.subRounds().size());
-        final var set2div2ml1 =  set2div2.subRounds().get(0);
+        final var set2div2ml1 = set2div2.subRounds().get(0);
         assertEquals(3, set2div2ml1.subRounds().size());
-        final var set2div2ml2 =  set2div2.subRounds().get(1);
+        final var set2div2ml2 = set2div2.subRounds().get(1);
         assertEquals(3, set2div2ml2.subRounds().size());
 
         final var matchList2 = matchListGenerator.generate(set2);
@@ -263,6 +279,19 @@ class SmokeTest {
                 teamResults.forEach(t -> log.info("{}->{}", msg, t.name()));
             }
         }
+
+        // Example of OM ignoring methods for normalization
+        final ObjectMapper om = new ObjectMapper().deactivateDefaultTyping();
+        om.setVisibility(om.getSerializationConfig().getDefaultVisibilityChecker()
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY));
+        SimpleModule sm = new SimpleModule();
+        sm.addSerializer(Team.class, JacksonSerializationUtils.normalizer(t -> t.id().id()));
+        om.registerModule(sm);
+        log.info(om.writerWithDefaultPrettyPrinter().writeValueAsString(set1));
     }
 
 }

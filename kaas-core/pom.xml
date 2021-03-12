@@ -16,4 +16,12 @@
     <packaging>jar</packaging>
 
     <description>The main core data and abstractions for KAAS</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+    </dependencies>
 </project>
