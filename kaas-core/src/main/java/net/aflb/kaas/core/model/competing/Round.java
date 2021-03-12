@@ -1,6 +1,5 @@
 package net.aflb.kaas.core.model.competing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.aflb.kaas.core.KaasID;
 import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.League;

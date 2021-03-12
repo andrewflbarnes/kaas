@@ -1,5 +1,7 @@
 package net.aflb.kaas.core.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +14,27 @@ import java.util.stream.Collectors;
 public class Registry {
     final Map<League, Map<Club, Set<Team>>> leagues = new HashMap<>();
     final Map<Division, Set<Team>> divisions = new HashMap<>();
+
+    public List<League> getLeagues() {
+        return new ArrayList<>(leagues.keySet());
+    }
+
+    public List<Division> getDivisions() {
+        return new ArrayList<>(divisions.keySet());
+    }
+
+    public List<Club> getClubs() {
+        return leagues.values().stream()
+                .map(Map::keySet)
+                .flatMap(Set::stream)
+                .collect(Collectors.toList());
+    }
+
+    public List<Team> getTeams() {
+        return divisions.values().stream()
+                .flatMap(Set::stream)
+                .collect(Collectors.toList());
+    }
 
     public Registry registerLeague(final League league) {
         if (leagues.containsKey(league)) {

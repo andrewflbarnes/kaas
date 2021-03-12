@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import net.aflb.kaas.core.model.Club;
 import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.League;
 import net.aflb.kaas.core.model.Team;
@@ -19,8 +20,7 @@ public class JacksonSerializationUtils {
 
     private JacksonSerializationUtils() {}
 
-
-    public static ObjectMapper normalisedObjectMapper() {
+    public static ObjectMapper normalisedRoundMapper() {
         final ObjectMapper om = new ObjectMapper().deactivateDefaultTyping();
 
         om.setVisibility(om.getSerializationConfig().getDefaultVisibilityChecker()
@@ -30,8 +30,31 @@ public class JacksonSerializationUtils {
                 .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY));
 
-        SimpleModule sm = new SimpleModule();
+        final SimpleModule sm = new SimpleModule();
         sm.addSerializer(Team.class, JacksonSerializationUtils.normalizer(t -> t.id().id()));
+        sm.addKeySerializer(Club.class, JacksonSerializationUtils.keyNormalizer(t -> t.id().id()));
+        sm.addKeySerializer(Division.class, JacksonSerializationUtils.keyNormalizer(d -> d.id().id()));
+        sm.addKeySerializer(Match.class, JacksonSerializationUtils.keyNormalizer(m -> m.getId().id()));
+        sm.addKeySerializer(Round.class, JacksonSerializationUtils.keyNormalizer(r -> r.id().id()));
+        sm.addKeySerializer(League.class, JacksonSerializationUtils.keyNormalizer(l -> l.id().id()));
+        om.registerModule(sm);
+
+        return om;
+    }
+
+    public static ObjectMapper normalisedMapper() {
+        final ObjectMapper om = new ObjectMapper().deactivateDefaultTyping();
+
+        om.setVisibility(om.getSerializationConfig().getDefaultVisibilityChecker()
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY));
+
+        final SimpleModule sm = new SimpleModule();
+        sm.addKeySerializer(Team.class, JacksonSerializationUtils.keyNormalizer(t -> t.id().id()));
+        sm.addKeySerializer(Club.class, JacksonSerializationUtils.keyNormalizer(t -> t.id().id()));
         sm.addKeySerializer(Division.class, JacksonSerializationUtils.keyNormalizer(d -> d.id().id()));
         sm.addKeySerializer(Match.class, JacksonSerializationUtils.keyNormalizer(m -> m.getId().id()));
         sm.addKeySerializer(Round.class, JacksonSerializationUtils.keyNormalizer(r -> r.id().id()));

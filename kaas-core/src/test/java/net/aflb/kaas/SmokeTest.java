@@ -1,5 +1,6 @@
 package net.aflb.kaas;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.model.Club;
@@ -18,12 +19,15 @@ import net.aflb.kaas.kings.engine.StandardMatchListGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -278,10 +282,26 @@ class SmokeTest {
             }
         }
 
-        // Check serialization normalisation manually
-        final ObjectMapper om = JacksonSerializationUtils.normalisedObjectMapper();
-        log.info(om.writerWithDefaultPrettyPrinter().writeValueAsString(set1));
-        // TODO check deserialization
-    }
+        // Prove we can serialise everything normalised...
 
+        // Check serialization normalisation manually
+        final ObjectMapper normaliser = JacksonSerializationUtils.normalisedRoundMapper();
+        log.info(normaliser.writerWithDefaultPrettyPrinter().writeValueAsString(round));
+        // TODO check deserialization
+
+        final ObjectMapper om = JacksonSerializationUtils.normalisedMapper();
+        final Function<Collection<?>, String> stringer = (Collection<?> items) -> {
+            try {
+                return om.writerWithDefaultPrettyPrinter().writeValueAsString(items.stream()
+                        .collect(Collectors.toMap(Function.identity(), Function.identity())));
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException("Could not serialise JSON", e);
+            }
+        };
+
+        log.info("\n{}", stringer.apply(registry.getLeagues()));
+        log.info("\n{}", stringer.apply(registry.getDivisions()));
+        log.info("\n{}", stringer.apply(registry.getTeams()));
+        log.info("\n{}", stringer.apply(registry.getClubs()));
+    }
 }
