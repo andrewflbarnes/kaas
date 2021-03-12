@@ -1,4 +1,4 @@
-package net.aflb.kaas.core.legacy.races;
+package net.aflb.kaas;
 
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.model.Club;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
-class SetOneMatchGeneratorTest {
+class SmokeTest {
 
     @Test
     void test() throws Exception {
