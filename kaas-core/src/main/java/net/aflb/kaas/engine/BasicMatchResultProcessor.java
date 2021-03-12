@@ -42,7 +42,8 @@ public class BasicMatchResultProcessor implements MatchResultProcessor {
 
         // pass one - we have a built in weighting which we sort on giving approximate team standings
         final var passOne = teamOrder.values().stream()
-                .sorted(Comparator.comparingInt(WinDsq::weighting))
+                // reverse the comparator so that higher scores place higher
+                .sorted(WinDsq.WEIGHTED)
                 .collect(Collectors.toList());
 
         // Second pass: traverse through the array and find drawing teams

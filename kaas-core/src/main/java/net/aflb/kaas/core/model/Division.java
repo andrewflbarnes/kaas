@@ -9,6 +9,7 @@ public record Division(
         int rank
 ) implements Comparable<Division> {
     public static final Comparator<Division> BY_RANK = Comparator.comparingInt(Division::rank);
+    public static final Division NONE = Division.of("NONE", 999);
 
     public static Division of(final String name, final int rank) {
         // FIXME

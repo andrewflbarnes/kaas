@@ -36,13 +36,13 @@ class SetOneMatchGeneratorTest {
         final League league = League.of("Northern");
         final Division division1 = Division.of("Mixed",1);
         final Division division2 = Division.of("Ladies", 2);
-        final Club club1 = Club.of("Kings 1");
+        final Club club1 = Club.of("Kings");
         Team team11 = Team.of("Kings 1");
-        Team team21 = Team.of("Kings 1");
         Team team12 = Team.of("Kings 2");
         Team team13 = Team.of("Kings 3");
         Team team14 = Team.of("Kings 4");
         final Club club2 = Club.of("Southampton 2");
+        Team team21 = Team.of("Southampton 1");
         Team team22 = Team.of("Southampton 2");
         Team team23 = Team.of("Southampton 3");
         Team team24 = Team.of("Southampton 4");
@@ -59,27 +59,35 @@ class SetOneMatchGeneratorTest {
         Team team62 = Team.of("SKUM 2");
         Team team63 = Team.of("SKUM 3");
         registry.registerLeague(league)
+
                 .registerDivision(division1)
                 .registerDivision(division2)
+
                 .registerClub(club1, league)
                 .registerClub(club2, league)
                 .registerClub(club3, league)
                 .registerClub(club4, league)
                 .registerClub(club5, league)
                 .registerClub(club6, league)
+
                 .registerTeam(team11, club1, division1)
-                .registerTeam(team21, club2, division1)
                 .registerTeam(team12, club1, division1)
                 .registerTeam(team13, club1, division1)
                 .registerTeam(team14, club1, division1)
+
+                .registerTeam(team21, club2, division1)
                 .registerTeam(team22, club2, division1)
                 .registerTeam(team23, club2, division1)
                 .registerTeam(team24, club2, division1)
+
                 .registerTeam(team31, club3, division2)
                 .registerTeam(team32, club3, division2)
                 .registerTeam(team33, club3, division2)
+
                 .registerTeam(team41, club4, division2)
+
                 .registerTeam(team51, club5, division2)
+
                 .registerTeam(team61, club6, division2)
                 .registerTeam(team62, club6, division2)
                 .registerTeam(team63, club6, division2);
@@ -174,7 +182,8 @@ class SetOneMatchGeneratorTest {
 
         // Fake results
         final Set<Team> winTeams = new HashSet<>();
-        matchList.forEach(m -> {
+        matchList.forEach(mm -> {
+            final var m = mm.getMatch();
             if (winTeams.contains(m.getTeamOne())) {
                 m.setWinner(Match.Winner.ONE);
             } else if (winTeams.contains(m.getTeamTwo())) {
@@ -229,10 +238,10 @@ class SetOneMatchGeneratorTest {
         final var matchList2 = matchListGenerator.generate(set2);
         assertEquals(24, matchList2.size());
 
-
         // Fake results
         final Set<Team> winTeams2 = new HashSet<>();
-        matchList2.forEach(m -> {
+        matchList2.forEach(mm -> {
+            final var m = mm.getMatch();
             if (winTeams2.contains(m.getTeamOne())) {
                 m.setWinner(Match.Winner.ONE);
             } else if (winTeams2.contains(m.getTeamTwo())) {
@@ -242,6 +251,13 @@ class SetOneMatchGeneratorTest {
                 winTeams2.add(m.getTeamOne());
             }
         });
+
+        log.info("RACELIST %s".formatted(set2.name()));
+        for (int i = 0; i < matchList2.size(); i++) {
+            final var mm = matchList2.get(i);
+            final var match = mm.getMatch();
+            log.info("{} {} : {} v {} ({})", mm.getDivision().name(), i + 1, match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner().name());
+        }
 
         assertTrue(set2.isComplete());
         assertTrue(round.isComplete());

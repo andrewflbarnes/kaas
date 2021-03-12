@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import net.aflb.kaas.core.model.Team;
 
+import java.util.Comparator;
 import java.util.function.Function;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -14,6 +15,8 @@ public class WinDsq {
     private static final int DEFAULT_WEIGHT_WIN = 100;
     private static final int DEFAULT_WEIGHT_DSQ = 10;
     private static final int DEFAULT_WEIGHT_ADJUSTMENT = 1;
+
+    public static final Comparator<WinDsq> WEIGHTED = Comparator.comparingInt(WinDsq::weighting).reversed();
 
     public static Function<Team, WinDsq> factory() {
         return customWeightedFactory(DEFAULT_WEIGHT_WIN, DEFAULT_WEIGHT_DSQ, DEFAULT_WEIGHT_ADJUSTMENT);
