@@ -125,11 +125,11 @@ class SetOneMatchGeneratorTest {
         assertNotNull(sets);
         assertEquals(1, sets.size());
 
-        final var set = sets.get(0);
+        final var set1 = sets.get(0);
 
-        final var divisions = set.subRounds();
-        assertNotNull(divisions);
-        assertEquals(2, divisions.size());
+        final var set1divisions = set1.subRounds();
+        assertNotNull(set1divisions);
+        assertEquals(2, set1divisions.size());
 
         // check ranking
         final var seconds = List.of(team22, team62);
@@ -152,7 +152,7 @@ class SetOneMatchGeneratorTest {
         });
         final var actualSeconds = new ArrayList<Team>();
         final var actualWinners = new ArrayList<Team>();
-        divisions.forEach(d -> d.teamRankings().values().forEach(ts -> {
+        set1divisions.forEach(d -> d.teamRankings().values().forEach(ts -> {
             actualWinners.add(ts.get(0));
             actualSeconds.add(ts.get(1));
         }));
@@ -165,7 +165,7 @@ class SetOneMatchGeneratorTest {
 
         // check list generation
         final var matchListGenerator = new StandardMatchListGenerator();
-        final var matchList = matchListGenerator.generate(set);
+        final var matchList = matchListGenerator.generate(set1);
         assertEquals(24, matchList.size());
 
 //        log.info("RACELIST %s".formatted(set.name()));
@@ -185,11 +185,12 @@ class SetOneMatchGeneratorTest {
             }
         });
 
+        assertTrue(set1.isComplete());
         assertTrue(round.isComplete());
 
         log.info("SET 1 RESULTS");
         final MatchResultProcessor mrp = new BasicMatchResultProcessor();
-        for (Round division : divisions) {
+        for (Round division : set1divisions) {
             assertTrue(division.isComplete());
             for (Round minileague : division.subRounds()) {
                 assertTrue(minileague.isComplete());
@@ -224,6 +225,38 @@ class SetOneMatchGeneratorTest {
         assertEquals(3, set2div2ml1.subRounds().size());
         final var set2div2ml2 =  set2div2.subRounds().get(1);
         assertEquals(3, set2div2ml2.subRounds().size());
+
+        final var matchList2 = matchListGenerator.generate(set2);
+        assertEquals(24, matchList2.size());
+
+
+        // Fake results
+        final Set<Team> winTeams2 = new HashSet<>();
+        matchList2.forEach(m -> {
+            if (winTeams2.contains(m.getTeamOne())) {
+                m.setWinner(Match.Winner.ONE);
+            } else if (winTeams2.contains(m.getTeamTwo())) {
+                m.setWinner(Match.Winner.TWO);
+            } else {
+                m.setWinner(Match.Winner.ONE);
+                winTeams2.add(m.getTeamOne());
+            }
+        });
+
+        assertTrue(set2.isComplete());
+        assertTrue(round.isComplete());
+
+        log.info("SET 2 RESULTS");
+        final var set2divisions = set2.subRounds();
+        for (Round division : set2divisions) {
+            assertTrue(division.isComplete());
+            for (Round minileague : division.subRounds()) {
+                assertTrue(minileague.isComplete());
+                final String msg = "%s->%s".formatted(division.name(), minileague.name());
+                final List<Team> teamResults = mrp.getResults(minileague.matches());
+                teamResults.forEach(t -> log.info("{}->{}", msg, t.name()));
+            }
+        }
     }
 
 }
