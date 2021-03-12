@@ -1,11 +1,7 @@
 package net.aflb.kaas;
 
 import lombok.extern.slf4j.Slf4j;
-import net.aflb.kaas.core.model.Club;
-import net.aflb.kaas.core.model.Division;
-import net.aflb.kaas.core.model.League;
-import net.aflb.kaas.core.model.Registry;
-import net.aflb.kaas.core.model.Team;
+import net.aflb.kaas.core.model.*;
 import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.spi.MatchResultProcessor;
@@ -15,17 +11,9 @@ import net.aflb.kaas.kings.engine.SetTwoMatchGenerator;
 import net.aflb.kaas.kings.engine.StandardMatchListGenerator;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class SmokeTest {
@@ -92,6 +80,8 @@ class SmokeTest {
                 .registerTeam(team62, club6, division2)
                 .registerTeam(team63, club6, division2);
 
+        // we use this as the "strategy" in getSeeds. In the real world we'd use actual seed information and a more
+        // complex comparator.
         final Map<Team, Integer> seeding = new HashMap<>();
         seeding.put(team11, 10);
         seeding.put(team21, 2);
@@ -210,7 +200,7 @@ class SmokeTest {
         }
 
         // FIXME pretty sure these are ignored
-        new SetTwoMatchGenerator(2,false).generate(round);
+        new SetTwoMatchGenerator(2).generate(round);
         log.info("ROUND SET 2 DEBUG\n{}", round.subRounds().get(1).debug());
 
         assertEquals(2, round.subRounds().size());
