@@ -180,7 +180,7 @@ class SmokeTest {
 //        }));
 
         // check list generation
-        final var matchListGenerator = new StandardMatchListGenerator();
+        final var matchListGenerator = new StandardMatchListGenerator(false);
         final var matchList = matchListGenerator.generate(set1);
         assertEquals(24, matchList.size());
 
@@ -222,7 +222,7 @@ class SmokeTest {
         }
 
         // FIXME pretty sure these are ignored
-        new SetTwoMatchGenerator(2).generate(round);
+        new SetTwoMatchGenerator(false).generate(round);
         log.info("ROUND SET 2 DEBUG\n{}", round.subRounds().get(1).debug());
 
         assertEquals(2, round.subRounds().size());
@@ -286,26 +286,49 @@ class SmokeTest {
             }
         }
 
+
+        new SetTwoMatchGenerator(true).generate(round);
+        final var set3 = round.subRounds().get(2);
+        log.info("ROUND KNOCKOUT DEBUG\n{}", set3.debug());
+
+        // TODO asserts
+
+        final var knockoutMatchListGenerator = new StandardMatchListGenerator(true);
+        final var matchList3 = knockoutMatchListGenerator.generate(set3);
+        assertEquals(8, matchList3.size());
+
+        // Fake results
+        matchList3.forEach(mm -> {
+            mm.getMatch().setWinner(Match.Winner.ONE);
+        });
+
+        log.info("RACELIST %s".formatted(set3.name()));
+        for (int i = 0; i < matchList3.size(); i++) {
+            final var mm = matchList3.get(i);
+            final var match = mm.getMatch();
+            log.info("{} {} {} : {} v {} ({})", mm.getDivision().name(), mm.getMinileague(), i + 1, match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner().name());
+        }
+
         // Prove we can serialise everything normalised...
 
-        // Check serialization normalisation manually
-        final ObjectMapper normaliser = JacksonSerializationUtils.normalisedRoundMapper();
-        log.info(normaliser.writerWithDefaultPrettyPrinter().writeValueAsString(round));
-        // TODO check deserialization
-
-        final ObjectMapper om = JacksonSerializationUtils.normalisedMapper();
-        final Function<Collection<?>, String> stringer = (Collection<?> items) -> {
-            try {
-                return om.writerWithDefaultPrettyPrinter().writeValueAsString(items.stream()
-                        .collect(Collectors.toMap(Function.identity(), Function.identity())));
-            } catch (JsonProcessingException e) {
-                throw new IllegalStateException("Could not serialise JSON", e);
-            }
-        };
-
-        log.info("\n{}", stringer.apply(registry.getLeagues()));
-        log.info("\n{}", stringer.apply(registry.getDivisions()));
-        log.info("\n{}", stringer.apply(registry.getTeams()));
-        log.info("\n{}", stringer.apply(registry.getClubs()));
+//        // Check serialization normalisation manually
+//        final ObjectMapper normaliser = JacksonSerializationUtils.normalisedRoundMapper();
+//        log.info(normaliser.writerWithDefaultPrettyPrinter().writeValueAsString(round));
+//        // TODO check deserialization
+//
+//        final ObjectMapper om = JacksonSerializationUtils.normalisedMapper();
+//        final Function<Collection<?>, String> stringer = (Collection<?> items) -> {
+//            try {
+//                return om.writerWithDefaultPrettyPrinter().writeValueAsString(items.stream()
+//                        .collect(Collectors.toMap(Function.identity(), Function.identity())));
+//            } catch (JsonProcessingException e) {
+//                throw new IllegalStateException("Could not serialise JSON", e);
+//            }
+//        };
+//
+//        log.info("\n{}", stringer.apply(registry.getLeagues()));
+//        log.info("\n{}", stringer.apply(registry.getDivisions()));
+//        log.info("\n{}", stringer.apply(registry.getTeams()));
+//        log.info("\n{}", stringer.apply(registry.getClubs()));
     }
 }

@@ -3,6 +3,7 @@ package net.aflb.kaas.kings.engine;
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration.InvalidNumberOfTeamsException;
+import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationKnockout;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetTwo;
 import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
 import net.aflb.kaas.core.legacy.races.group.RaceGroup;
@@ -49,21 +50,13 @@ import java.util.stream.Stream;
 // FIXME
 @Slf4j
 public class SetTwoMatchGenerator implements MatchGenerator {
-    private static final int THIS_ROUND_NO = 2;
 
-    private static final int MINIMUM_SET_NO = 2;
-    private static final int MIN_SET_TWO_TEAMS = 7;
+    private final int roundNo;
+    final boolean knockout;
 
-    /**
-     * Parameterised constructor for instantiation.
-     *
-     * @param matchSetNo  the number of the set to generate Matchs for
-     */
-    public SetTwoMatchGenerator(int matchSetNo) {
-        if (matchSetNo < MINIMUM_SET_NO) {
-            throw new SetNumberTooLowException("Param matchSetNo (" + matchSetNo + ") must be " +
-                    MINIMUM_SET_NO + " or higher");
-        }
+    public SetTwoMatchGenerator(boolean knockout) {
+        this.knockout = knockout;
+        this.roundNo = knockout ? 3 : 2;
     }
 
 
@@ -100,8 +93,9 @@ public class SetTwoMatchGenerator implements MatchGenerator {
         }
 
         // TODO mass of duplicate code in SetOneMatchGenerator
-        final var set2 = Round.of(true, "set 2", round.seeds(), round.league());
-        round.subRounds().add(set2);
+        final var setName = knockout ? "knockouts" : "set 2";
+        final var nextSet = Round.of(true, setName, round.seeds(), round.league());
+        round.subRounds().add(nextSet);
 
         for (Map.Entry<Round, Map<String, List<Team>>> divisionResult : divisionResults.entrySet()) {
             final Map<String, RaceGroup> raceGroupMap;
@@ -136,7 +130,7 @@ public class SetTwoMatchGenerator implements MatchGenerator {
                 }
                 setDivision.subRounds().add(setDivisionMinileague);
             });
-            set2.subRounds().add(setDivision);
+            nextSet.subRounds().add(setDivision);
         }
         return null;
     }
@@ -158,7 +152,18 @@ public class SetTwoMatchGenerator implements MatchGenerator {
         final Map<String, Team> teamOrder = new HashMap<>();
         divisionResults.forEach((minileague, miniLeagueResults) -> {
             for (int i = 0; i < miniLeagueResults.size(); i++) {
-                teamOrder.put((i + 1) + minileague, miniLeagueResults.get(i));
+                final var resolvedMiniLeague = switch (minileague) {
+                    case "I" -> "1";
+                    case "II" -> "2";
+                    case "III" -> "3";
+                    case "IV" -> "4";
+                    case "V" -> "5";
+                    case "VI" -> "6";
+                    case "VII" -> "7";
+                    case "VIII" -> "8";
+                    default -> minileague;
+                };
+                teamOrder.put((i + 1) + resolvedMiniLeague, miniLeagueResults.get(i));
             }
         });
 
@@ -188,19 +193,9 @@ public class SetTwoMatchGenerator implements MatchGenerator {
         // TODO return empty map if the teamMap size is 0
 
         // Generate the configuration required for this set of matches
-        // FIXME?
-        final DivisionConfiguration config = new DivisionConfigurationSetTwo(teamsMap.size());
-//        switch (this.MatchSetNo) {
-//            case 2:
-//                config = new DivisionConfigurationSetTwo(teamsMap.size());
-//                break;
-//            case 3:
-//                config = new DivisionConfigurationKnockout(teamsMap.size());
-//                break;
-//            default:
-//                throw new DivisionConfiguration.InvalidSetupException("No division configuration " +
-//                        "exists for the required set (" + this.MatchSetNo + ")");
-//        }
+        final DivisionConfiguration config = knockout
+            ? new DivisionConfigurationKnockout(teamsMap.size())
+            : new DivisionConfigurationSetTwo(teamsMap.size());
 
         final String[][] transformationMapping = config.getTransformationMapping();
         final String[] groupNames = config.getGroupNames();
@@ -208,7 +203,8 @@ public class SetTwoMatchGenerator implements MatchGenerator {
 
         // Initialise the map we are returning
         // FIXME was ArrayMap
-        final Map<String, RaceGroup> raceGroups = new HashMap<>(groupNames.length);
+        // Preserve the order we had race groups in to simplify determining race order :)
+        final Map<String, RaceGroup> raceGroups = new LinkedHashMap<>(groupNames.length);
 
         // If there are no matches to run (zero length groupNames array or a zero length groupGrid
         // array or zero length transformationMapping array) return the empty map
@@ -228,7 +224,7 @@ public class SetTwoMatchGenerator implements MatchGenerator {
 
             // Create a new RageGroup and add the teams who are competing to it
             RaceGroup group = new RaceGroup(groupNames[i],
-                    teams, groupGrid[i], 999 /* controlId */, THIS_ROUND_NO);
+                    teams, groupGrid[i], 999 /* controlId */, roundNo);
 
             // Add the group to the map
             raceGroups.put(groupNames[i], group);

@@ -39,7 +39,7 @@ public class GroupConfiguration {
 			{ { 2, 1 } },
 			{ { 1, 2 } } });
 	public static final GroupConfiguration KNOCKOUT = new GroupConfiguration("2F", new int[][][] {
-			{ { 1, 2 } }, {}, {}});
+			{ { 1, 2 } }});
 	public static final GroupConfiguration THREE = new GroupConfiguration("3", new int[][][] {
 			{ { 1, 2 } },
 			{ { 2, 3 } },
