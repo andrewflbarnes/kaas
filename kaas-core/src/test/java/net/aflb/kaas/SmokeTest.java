@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,20 +48,20 @@ class SmokeTest {
         Team team12 = Team.of("Kings 2");
         Team team13 = Team.of("Kings 3");
         Team team14 = Team.of("Kings 4");
-        final Club club2 = Club.of("Southampton 2");
+        final Club club2 = Club.of("Southampton");
         Team team21 = Team.of("Southampton 1");
         Team team22 = Team.of("Southampton 2");
         Team team23 = Team.of("Southampton 3");
         Team team24 = Team.of("Southampton 4");
-        final Club club3 = Club.of("UWE 3");
+        final Club club3 = Club.of("UWE");
         Team team31 = Team.of("UWE 1");
         Team team32 = Team.of("UWE 2");
         Team team33 = Team.of("UWE 3");
-        final Club club4 = Club.of("Bath 4");
+        final Club club4 = Club.of("Bath");
         Team team41 = Team.of("Bath 1");
-        final Club club5 = Club.of("NUSSC 5");
+        final Club club5 = Club.of("NUSSC");
         Team team51 = Team.of("NUSSC 1");
-        final Club club6 = Club.of("SKUM 6");
+        final Club club6 = Club.of("SKUM");
         Team team61 = Team.of("SKUM 1");
         Team team62 = Team.of("SKUM 2");
         Team team63 = Team.of("SKUM 3");
@@ -309,23 +310,41 @@ class SmokeTest {
             log.info("{} {} {} : {} v {} ({})", mm.getDivision().name(), mm.getMinileague(), i + 1, match.getTeamOne().name(), match.getTeamTwo().name(), match.getWinner().name());
         }
 
+        assertTrue(set3.isComplete());
+        assertTrue(round.isComplete());
+
+        log.info("KNOCKOUT RESULTS");
+        final var set3divisions = set3.subRounds();
+        for (Round division : set3divisions) {
+            assertTrue(division.isComplete());
+            for (Round minileague : division.subRounds()) {
+                assertTrue(minileague.isComplete());
+                final var positions = minileague.name().split("/");
+                final List<Team> teamResults = mrp.getResults(minileague.matches());
+                IntStream.rangeClosed(0, 1).forEach(i -> {
+                    final var t = teamResults.get(i);
+                    log.info("{}->{}->{}", division.name(), positions[i], t.name());
+                });
+            }
+        }
+
         // Prove we can serialise everything normalised...
 
-//        // Check serialization normalisation manually
-//        final ObjectMapper normaliser = JacksonSerializationUtils.normalisedRoundMapper();
+        // Check serialization normalisation manually
+        final ObjectMapper normaliser = JacksonSerializationUtils.normalisedRoundMapper();
 //        log.info(normaliser.writerWithDefaultPrettyPrinter().writeValueAsString(round));
-//        // TODO check deserialization
-//
-//        final ObjectMapper om = JacksonSerializationUtils.normalisedMapper();
-//        final Function<Collection<?>, String> stringer = (Collection<?> items) -> {
-//            try {
-//                return om.writerWithDefaultPrettyPrinter().writeValueAsString(items.stream()
-//                        .collect(Collectors.toMap(Function.identity(), Function.identity())));
-//            } catch (JsonProcessingException e) {
-//                throw new IllegalStateException("Could not serialise JSON", e);
-//            }
-//        };
-//
+        // TODO check deserialization
+
+        final ObjectMapper om = JacksonSerializationUtils.normalisedMapper();
+        final Function<Collection<?>, String> stringer = (Collection<?> items) -> {
+            try {
+                return om.writerWithDefaultPrettyPrinter().writeValueAsString(items.stream()
+                        .collect(Collectors.toMap(Function.identity(), Function.identity())));
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException("Could not serialise JSON", e);
+            }
+        };
+
 //        log.info("\n{}", stringer.apply(registry.getLeagues()));
 //        log.info("\n{}", stringer.apply(registry.getDivisions()));
 //        log.info("\n{}", stringer.apply(registry.getTeams()));
