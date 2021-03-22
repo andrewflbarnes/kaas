@@ -16,34 +16,56 @@ import net.aflb.kaas.core.model.competing.Round;
 import java.io.IOException;
 import java.util.function.Function;
 
-public class JacksonSerializationUtils {
+public class SerializationUtils {
 
-    private JacksonSerializationUtils() {}
+    private SerializationUtils() {}
 
+    /**
+     * Returns an {@link ObjectMapper} which will normalise a {@link Round}
+     * @return an {@link ObjectMapper} for normalising kaas models
+     */
     public static ObjectMapper normalisedRoundMapper() {
-        final ObjectMapper om = new ObjectMapper().deactivateDefaultTyping();
-
-        om.setVisibility(om.getSerializationConfig().getDefaultVisibilityChecker()
-                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withFieldVisibility(JsonAutoDetect.Visibility.ANY));
-
-        final SimpleModule sm = new SimpleModule();
-        sm.addSerializer(Team.class, JacksonSerializationUtils.normalizer(t -> t.id().id()));
-        sm.addKeySerializer(Club.class, JacksonSerializationUtils.keyNormalizer(t -> t.id().id()));
-        sm.addKeySerializer(Division.class, JacksonSerializationUtils.keyNormalizer(d -> d.id().id()));
-        sm.addKeySerializer(Match.class, JacksonSerializationUtils.keyNormalizer(m -> m.getId().id()));
-        sm.addKeySerializer(Round.class, JacksonSerializationUtils.keyNormalizer(r -> r.id().id()));
-        sm.addKeySerializer(League.class, JacksonSerializationUtils.keyNormalizer(l -> l.id().id()));
-        om.registerModule(sm);
+        final var om = baseMapper();
+        final var mod = baseModule();
+        mod.addSerializer(Team.class, SerializationUtils.normalizer(t -> t.id().id()));
+        mod.addSerializer(Club.class, SerializationUtils.normalizer(c -> c.id().id()));
+        mod.addSerializer(Division.class, SerializationUtils.normalizer(d -> d.id().id()));
+        mod.addSerializer(Match.class, SerializationUtils.normalizer(m -> m.getId().id()));
+        mod.addSerializer(League.class, SerializationUtils.normalizer(l -> l.id().id()));
+        om.registerModule(mod);
 
         return om;
     }
 
+    /**
+     * Returns an {@link ObjectMapper} which will approximately normalise a {@link Match}
+     * @return an {@link ObjectMapper} for normalising kaas models
+     */
+    public static ObjectMapper normalisedMatchMapper() {
+        final var om = baseMapper();
+        final var mod = baseModule();
+        mod.addSerializer(Team.class, SerializationUtils.normalizer(t -> t.id().id()));
+        om.registerModule(mod);
+
+        return om;
+    }
+
+    /**
+     * Returns an {@link ObjectMapper} which will fully normalise a {@link Round} and more generally the kaas data
+     * models.
+     *
+     * @return an {@link ObjectMapper} for normalising kaas models
+     */
     public static ObjectMapper normalisedMapper() {
-        final ObjectMapper om = new ObjectMapper().deactivateDefaultTyping();
+        final var om = baseMapper();
+        final var mod = baseModule();
+        om.registerModule(mod);
+
+        return om;
+    }
+
+    private static ObjectMapper baseMapper() {
+        final var om = new ObjectMapper().deactivateDefaultTyping();
 
         om.setVisibility(om.getSerializationConfig().getDefaultVisibilityChecker()
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE)
@@ -52,16 +74,25 @@ public class JacksonSerializationUtils {
                 .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY));
 
-        final SimpleModule sm = new SimpleModule();
-        sm.addKeySerializer(Team.class, JacksonSerializationUtils.keyNormalizer(t -> t.id().id()));
-        sm.addKeySerializer(Club.class, JacksonSerializationUtils.keyNormalizer(t -> t.id().id()));
-        sm.addKeySerializer(Division.class, JacksonSerializationUtils.keyNormalizer(d -> d.id().id()));
-        sm.addKeySerializer(Match.class, JacksonSerializationUtils.keyNormalizer(m -> m.getId().id()));
-        sm.addKeySerializer(Round.class, JacksonSerializationUtils.keyNormalizer(r -> r.id().id()));
-        sm.addKeySerializer(League.class, JacksonSerializationUtils.keyNormalizer(l -> l.id().id()));
-        om.registerModule(sm);
-
         return om;
+    }
+
+    /**
+     * Returns a {@link SimpleModule} with key serialisers for all entities. i.e. an entity appearing as a key will be
+     * serialized to it's ID
+     * @return a {@link SimpleModule}
+     */
+    private static SimpleModule baseModule() {
+        final var sm = new SimpleModule();
+
+        sm.addKeySerializer(Team.class, SerializationUtils.keyNormalizer(t -> t.id().id()));
+        sm.addKeySerializer(Club.class, SerializationUtils.keyNormalizer(c -> c.id().id()));
+        sm.addKeySerializer(Division.class, SerializationUtils.keyNormalizer(d -> d.id().id()));
+        sm.addKeySerializer(Match.class, SerializationUtils.keyNormalizer(m -> m.getId().id()));
+        sm.addKeySerializer(Round.class, SerializationUtils.keyNormalizer(r -> r.id().id()));
+        sm.addKeySerializer(League.class, SerializationUtils.keyNormalizer(l -> l.id().id()));
+
+        return sm;
     }
 
     public static <T> StdSerializer<T> keyNormalizer(final Function<T, String> idGetter) {

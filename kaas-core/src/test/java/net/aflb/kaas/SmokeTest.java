@@ -10,7 +10,7 @@ import net.aflb.kaas.core.model.Registry;
 import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
 import net.aflb.kaas.core.model.competing.Round;
-import net.aflb.kaas.core.serialization.JacksonSerializationUtils;
+import net.aflb.kaas.core.serialization.SerializationUtils;
 import net.aflb.kaas.core.spi.MatchResultProcessor;
 import net.aflb.kaas.engine.BasicMatchResultProcessor;
 import net.aflb.kaas.kings.engine.SetOneMatchGenerator;
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -331,23 +332,29 @@ class SmokeTest {
         // Prove we can serialise everything normalised...
 
         // Check serialization normalisation manually
-        final ObjectMapper normaliser = JacksonSerializationUtils.normalisedRoundMapper();
-//        log.info(normaliser.writerWithDefaultPrettyPrinter().writeValueAsString(round));
         // TODO check deserialization
+        logEntities(registry, round);
+    }
 
-        final ObjectMapper om = JacksonSerializationUtils.normalisedMapper();
-        final Function<Collection<?>, String> stringer = (Collection<?> items) -> {
-            try {
-                return om.writerWithDefaultPrettyPrinter().writeValueAsString(items.stream()
-                        .collect(Collectors.toMap(Function.identity(), Function.identity())));
-            } catch (JsonProcessingException e) {
-                throw new IllegalStateException("Could not serialise JSON", e);
-            }
-        };
+    private void logEntities(final Registry registry, final Round round) {
+        final var roundNormaliser = SerializationUtils.normalisedRoundMapper();
+        final var matchNormaliser = SerializationUtils.normalisedMatchMapper();
+        final var normaliser = SerializationUtils.normalisedMapper();
 
-//        log.info("\n{}", stringer.apply(registry.getLeagues()));
-//        log.info("\n{}", stringer.apply(registry.getDivisions()));
-//        log.info("\n{}", stringer.apply(registry.getTeams()));
-//        log.info("\n{}", stringer.apply(registry.getClubs()));
+        logEntities(roundNormaliser, List.of(round));
+        logEntities(normaliser, registry.getLeagues());
+        logEntities(normaliser, registry.getDivisions());
+        logEntities(normaliser, registry.getTeams());
+        logEntities(normaliser, registry.getClubs());
+        logEntities(matchNormaliser, round.matches());
+    }
+
+    private void logEntities(final ObjectMapper mapper, final Collection<?> items) {
+        try {
+            log.info("\n{}", mapper.writerWithDefaultPrettyPrinter().writeValueAsString(items.stream()
+                    .collect(Collectors.toMap(Function.identity(), Function.identity()))));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Could not serialise JSON", e);
+        }
     }
 }
