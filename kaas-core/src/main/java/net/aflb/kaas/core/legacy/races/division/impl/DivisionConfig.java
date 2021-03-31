@@ -2,6 +2,7 @@ package net.aflb.kaas.core.legacy.races.division.impl;
 
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.kings.engine.GroupConfiguration;
+import net.aflb.kaas.utils.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
@@ -148,15 +149,15 @@ public enum DivisionConfig {
     }
 
     public String[][] getTransformationMapping() {
-        return transformationMapping;
+        return ArrayUtils.copy2(transformationMapping);
     }
 
     public String[] initGroupNames() {
-        return groupNames;
+        return Arrays.copyOf(groupNames, groupNames.length);
     }
 
     public GroupConfiguration[] initGroupConfigs() {
-        return groupConfigs;
+        return Arrays.copyOf(groupConfigs, groupConfigs.length);
     }
 
     public DivisionConfiguration asLegacy() {
@@ -164,9 +165,9 @@ public enum DivisionConfig {
     }
 
     private GroupConfiguration[] initGroupConfigs(final int length) {
-        final var groupConfigs = new GroupConfiguration[length];
-        Arrays.fill(groupConfigs, GroupConfiguration.KNOCKOUT);
-        return groupConfigs;
+        final var init = new GroupConfiguration[length];
+        Arrays.fill(init, GroupConfiguration.KNOCKOUT);
+        return init;
     }
 
     private String[] initGroupNames(final int length) {
