@@ -5,8 +5,6 @@ import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration.InvalidNumberOfTeamsException;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationKnockout;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetTwo;
-import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
-import net.aflb.kaas.core.legacy.races.group.RaceGroup;
 import net.aflb.kaas.core.model.Club;
 import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;

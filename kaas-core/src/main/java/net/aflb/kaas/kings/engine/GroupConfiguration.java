@@ -1,4 +1,4 @@
-package net.aflb.kaas.core.legacy.races.group;
+package net.aflb.kaas.kings.engine;
 
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.model.Team;

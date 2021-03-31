@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration.InvalidNumberOfTeamsException;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetOne;
-import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
-import net.aflb.kaas.core.legacy.races.group.RaceGroup;
 import net.aflb.kaas.core.model.Club;
 import net.aflb.kaas.core.model.Division;
 import net.aflb.kaas.core.model.Team;

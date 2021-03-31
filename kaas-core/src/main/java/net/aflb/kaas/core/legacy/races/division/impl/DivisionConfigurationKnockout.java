@@ -4,7 +4,7 @@
 package net.aflb.kaas.core.legacy.races.division.impl;
 
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
-import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
+import net.aflb.kaas.kings.engine.GroupConfiguration;
 
 public class DivisionConfigurationKnockout implements DivisionConfiguration {
     private static final String NAME_12 = "1st/2nd";

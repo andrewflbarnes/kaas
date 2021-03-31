@@ -3,8 +3,8 @@
  */
 package net.aflb.kaas.core.legacy.races.division;
 
-import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
-import net.aflb.kaas.core.legacy.races.group.RaceGroup;
+import net.aflb.kaas.kings.engine.GroupConfiguration;
+import net.aflb.kaas.kings.engine.RaceGroup;
 
 /**
  * <p>

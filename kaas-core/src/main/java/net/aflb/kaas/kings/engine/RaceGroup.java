@@ -1,4 +1,4 @@
-package net.aflb.kaas.core.legacy.races.group;
+package net.aflb.kaas.kings.engine;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,12 +6,9 @@ import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This class is equivalent to the Tables configuration in the excel cheat sheet
@@ -21,19 +18,11 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class RaceGroup {
-	private static final int TEAM_NOT_FOUND = -1;
 
 	private List<Team> teams;
 	private GroupConfiguration configuration;
 	private String groupName;
 	private List<List<Match<?>>> matches;
-
-	/**
-	 * Blank constructor
-	 */
-	public RaceGroup() {
-		// Empty constructor
-	}
 
 	/**
 	 * @param groupName

@@ -4,8 +4,8 @@
 package net.aflb.kaas.core.legacy.races.division.impl;
 
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
-import net.aflb.kaas.core.legacy.races.group.GroupConfiguration;
-import net.aflb.kaas.core.legacy.races.group.RaceGroup;
+import net.aflb.kaas.kings.engine.GroupConfiguration;
+import net.aflb.kaas.kings.engine.RaceGroup;
 
 /**
  * <p>
