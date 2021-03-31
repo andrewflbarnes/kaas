@@ -197,7 +197,7 @@ public class SetTwoMatchGenerator implements MatchGenerator {
 
         final String[][] transformationMapping = config.getTransformationMapping();
         final String[] groupNames = config.getGroupNames();
-        final GroupConfiguration[] groupGrid = config.getGroupGrid();
+        final GroupConfiguration[] groupGrid = config.getGroupConfigs();
 
         // Initialise the map we are returning
         // FIXME was ArrayMap

@@ -18,7 +18,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
     private static final String NAME_1718 = "17th/18th";
     private static final String NAME_1920 = "19th/20th";
 
-    private GroupConfiguration[] groupGrid;
+    private GroupConfiguration[] groupConfigs;
     private String[] groupNames;
     private String[][] transformationMapping;
 
@@ -37,8 +37,8 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
     }
 
     @Override
-    public GroupConfiguration[] getGroupGrid() {
-        return this.groupGrid;
+    public GroupConfiguration[] getGroupConfigs() {
+        return this.groupConfigs;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
         switch (numTeams) {
         case 4:
         case 5:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT
             };
             this.transformationMapping = new String[][] {
@@ -59,7 +59,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             };
             break;
         case 6:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT
             };
@@ -68,7 +68,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             };
             break;
         case 7:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT
             };
             this.transformationMapping = new String[][] {
@@ -76,7 +76,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             };
             break;
         case 8:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT
             };
@@ -87,7 +87,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             break;
         case 9:
         case 10:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT
             };
@@ -100,7 +100,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
         case 12:
         case 13:
         case 15:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT
             };
@@ -110,7 +110,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             };
             break;
         case 14:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
@@ -124,7 +124,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             };
             break;
         case 16:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT
@@ -136,7 +136,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             };
             break;
         case 17:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
@@ -151,7 +151,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             break;
         case 18:
         case 19:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
@@ -167,7 +167,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             };
             break;
         case 20:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
@@ -183,7 +183,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             };
             break;
         case 21:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
@@ -209,7 +209,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
         case 30:
         case 31:
         case 32:
-            this.groupGrid = new GroupConfiguration[] {
+            this.groupConfigs = new GroupConfiguration[] {
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
                     GroupConfiguration.KNOCKOUT, GroupConfiguration.KNOCKOUT,
@@ -224,7 +224,7 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
             break;
         }
 
-        switch (this.groupGrid.length) {
+        switch (this.groupConfigs.length) {
         case 2:
             this.groupNames = new String[] {
                     NAME_12, NAME_34
@@ -286,11 +286,11 @@ public class DivisionConfigurationKnockout implements DivisionConfiguration {
         default:
             // Includes 5
             throw new InvalidSetupException("No group names exist for the required number of " +
-                    "groups (" + this.groupGrid.length + ")");
+                    "groups (" + this.groupConfigs.length + ")");
         }
 
-        if (this.groupGrid.length != this.groupNames.length) {
-            throw new InvalidSetupException("Number of groups (" + this.groupGrid.length + ") and" +
+        if (this.groupConfigs.length != this.groupNames.length) {
+            throw new InvalidSetupException("Number of groups (" + this.groupConfigs.length + ") and" +
                     " number of group names (" + this.groupNames.length + ") do not match");
         }
     }

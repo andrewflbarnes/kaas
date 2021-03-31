@@ -14,7 +14,7 @@ import net.aflb.kaas.kings.engine.RaceGroup;
  * The information which can be retrieved is:
  * <ul>
  * <li>A transformation mapping using {@link #getTransformationMapping()}</li>
- * <li>The number and type of {@link RaceGroup}s required using {@link #getGroupGrid()} (These
+ * <li>The number and type of {@link RaceGroup}s required using {@link #getGroupConfigs()} (These
  * are returned as an array of {@link GroupConfiguration}s)</li>
  * <li>The names of each group using {@link #getGroupNames()}</li>
  * </ul>
@@ -66,7 +66,7 @@ public interface DivisionConfiguration {
 	/**
 	 * @return The {@link GroupConfiguration} array for this number of teams
 	 */
-	GroupConfiguration[] getGroupGrid();
+	GroupConfiguration[] getGroupConfigs();
 
 	/**
 	 * This method configures the {@link GroupConfiguration} object for the

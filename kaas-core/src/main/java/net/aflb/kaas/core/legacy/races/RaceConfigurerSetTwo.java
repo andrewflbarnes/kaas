@@ -467,7 +467,7 @@ class RaceConfigurerSetTwo /* extends AsyncTask<Void, String, Boolean> */ {
 
 		String[][] transformationMapping = config.getTransformationMapping();
 		String[] groupNames = config.getGroupNames();
-		GroupConfiguration[] groupGrid = config.getGroupGrid();
+		GroupConfiguration[] groupGrid = config.getGroupConfigs();
 
 		// Initialise the map we are returning
 		// FIXME was ArrayMap

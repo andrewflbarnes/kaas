@@ -173,7 +173,7 @@ public class SetOneMatchGenerator implements MatchGenerator {
 
         final DivisionConfiguration config = new DivisionConfigurationSetOne(competingTeams.size());
         final String[] groupNames = config.getGroupNames();
-        final GroupConfiguration[] groupGrid = config.getGroupGrid();
+        final GroupConfiguration[] groupGrid = config.getGroupConfigs();
 
         // Create each of the current race groups
         for (int i = 0, n = groupNames.length; i < n; i++) {

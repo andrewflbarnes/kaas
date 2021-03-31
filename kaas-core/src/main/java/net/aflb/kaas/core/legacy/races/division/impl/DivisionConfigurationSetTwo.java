@@ -70,7 +70,7 @@ public class DivisionConfigurationSetTwo implements DivisionConfiguration {
 	 * @see org.kingsski.wax.configure.races.division.DivisionConfiguration#getGroupGrid()
 	 */
 	@Override
-	public GroupConfiguration[] getGroupGrid() {
+	public GroupConfiguration[] getGroupConfigs() {
 		return this.groupGrid;
 	}
 
