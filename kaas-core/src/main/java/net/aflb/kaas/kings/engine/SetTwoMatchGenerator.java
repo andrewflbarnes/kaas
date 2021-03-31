@@ -3,7 +3,7 @@ package net.aflb.kaas.kings.engine;
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration.InvalidNumberOfTeamsException;
-import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationKnockout;
+import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfig;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetTwo;
 import net.aflb.kaas.core.model.Club;
 import net.aflb.kaas.core.model.Team;
@@ -192,7 +192,7 @@ public class SetTwoMatchGenerator implements MatchGenerator {
 
         // Generate the configuration required for this set of matches
         final DivisionConfiguration config = knockout
-            ? new DivisionConfigurationKnockout(teamsMap.size())
+            ? DivisionConfig.knockout(teamsMap.size()).asLegacy()
             : new DivisionConfigurationSetTwo(teamsMap.size());
 
         final String[][] transformationMapping = config.getTransformationMapping();

@@ -13,7 +13,7 @@ package net.aflb.kaas.core.legacy.races;
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration;
 import net.aflb.kaas.core.legacy.races.division.DivisionConfiguration.InvalidNumberOfTeamsException;
-import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationKnockout;
+import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfig;
 import net.aflb.kaas.core.legacy.races.division.impl.DivisionConfigurationSetTwo;
 import net.aflb.kaas.kings.engine.GroupConfiguration;
 import net.aflb.kaas.kings.engine.RaceGroup;
@@ -450,14 +450,14 @@ class RaceConfigurerSetTwo /* extends AsyncTask<Void, String, Boolean> */ {
          * etc.
          */
         if (this.isKnockouts) {
-            config = new DivisionConfigurationKnockout(teamsMap.size());
+            config = DivisionConfig.knockout(teamsMap.size()).asLegacy();
         } else {
             switch (this.MatchSetNo) {
                 case 2:
                     config = new DivisionConfigurationSetTwo(teamsMap.size());
                     break;
                 case 3:
-                    config = new DivisionConfigurationKnockout(teamsMap.size());
+                    config = DivisionConfig.knockout(teamsMap.size()).asLegacy();
                     break;
                 default:
                     throw new DivisionConfiguration.InvalidSetupException("No division configuration " +
