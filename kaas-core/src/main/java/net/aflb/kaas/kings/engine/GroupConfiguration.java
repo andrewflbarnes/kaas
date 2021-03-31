@@ -3,6 +3,7 @@ package net.aflb.kaas.kings.engine;
 import lombok.extern.slf4j.Slf4j;
 import net.aflb.kaas.core.model.Team;
 import net.aflb.kaas.core.model.competing.Match;
+import net.aflb.kaas.utils.ArrayUtils;
 
 import java.util.Arrays;
 
@@ -90,20 +91,6 @@ public enum GroupConfiguration {
      *         be run
      */
     public int[][][] getRaceGrid() {
-        return copy(grid);
-    }
-
-    private int[][][] copy(final int[][][] original) {
-        final var iLength = original.length;
-        final var copy = new int[iLength][][];
-        for (int i = 0; i < iLength; i++) {
-            final var jLength = original[i].length;
-            copy[i] = new int[jLength][];
-            for (int j = 0; j < jLength; j++) {
-                copy[i][j] = Arrays.copyOf(original[i][j], original[i][j].length);
-            }
-        }
-
-        return copy;
+        return ArrayUtils.copy3(grid);
     }
 }
