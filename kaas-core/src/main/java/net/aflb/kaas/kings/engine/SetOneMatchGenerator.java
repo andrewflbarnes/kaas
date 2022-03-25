@@ -71,8 +71,6 @@ public class SetOneMatchGenerator implements MatchGenerator {
 
         for (final var division : divisions) {
             final var teams = competingTeams.get(division);
-            // TODO do we need to sort teams here? If so should we look at something like seeding?
-            Collections.sort(teams);
             log.debug("{} competing seeds", division.name());
             teams.forEach(team -> log.debug("{}", team.name()));
             final var setDivision = Round.of(true, division.name(), Collections.singletonMap(division, teams), round.league());
