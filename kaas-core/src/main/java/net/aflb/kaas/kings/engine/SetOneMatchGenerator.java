@@ -71,8 +71,7 @@ public class SetOneMatchGenerator implements MatchGenerator {
 
         for (final var division : divisions) {
             final var teams = competingTeams.get(division);
-            log.debug("{} competing seeds", division.name());
-            teams.forEach(team -> log.debug("{}", team.name()));
+            log.debug("{} competing seeds: {}", division.name(), teams.stream().map(Team::name).toList());
             final var setDivision = Round.of(true, division.name(), Collections.singletonMap(division, teams), round.league());
             // FIXME - holdover from android, we should propagate the exception
             final List<RaceGroup> raceGroupMap;
@@ -202,7 +201,10 @@ public class SetOneMatchGenerator implements MatchGenerator {
             }
 
             // Add the current team to the current group
-            raceGroups.get(groupNames[groupIdx]).getTeams().add(competingTeams.get(teamIdx));
+            final var team = competingTeams.get(teamIdx);
+            final var groupName = groupNames[groupIdx];
+            raceGroups.get(groupName).getTeams().add(team);
+            log.debug("Adding team {} to group {}", team.name(), groupName);
 
             // Increment the team index by 1
             teamIdx++;
@@ -216,9 +218,6 @@ public class SetOneMatchGenerator implements MatchGenerator {
         List<Team> theseTeams;
         for (int i = 0, n = groupNames.length; i < n; i++) {
             theseTeams = raceGroups.get(groupNames[i]).getTeams();
-            for (int j = 0, m = theseTeams.size(); j < m; j++) {
-                log.debug(theseTeams.get(j).name() + " in race group " + groupNames[i]);
-            }
 
             // Call the method to generate the races inside the RaceGroup
             raceGroups.get(groupNames[i]).initRaces();
