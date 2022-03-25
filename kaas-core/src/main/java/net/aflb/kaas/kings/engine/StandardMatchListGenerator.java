@@ -1,15 +1,18 @@
 package net.aflb.kaas.kings.engine;
 
 import net.aflb.kaas.core.model.Division;
+import net.aflb.kaas.core.model.League;
 import net.aflb.kaas.core.model.competing.MetaMatch;
 import net.aflb.kaas.core.model.competing.Round;
 import net.aflb.kaas.core.spi.MatchListGenerator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -55,6 +58,47 @@ import java.util.stream.Collectors;
 // TODO rename to PartitionedMatchListGenerator?
 // TODO define a nesting level so this i more generic?
 public class StandardMatchListGenerator implements MatchListGenerator {
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        boolean knockout = false;
+        final List<List<Division>> groups = new ArrayList<>();
+
+        protected Builder() {
+        }
+
+        public Builder asKnockout() {
+            return asKnockout(true);
+        }
+
+        public Builder asKnockout(boolean knockout) {
+            this.knockout = knockout;
+            return this;
+        }
+
+        public Builder withGroup(Division... divisions) {
+            final var divisionList = List.of(divisions);
+            final var existingDivisions = groups.stream()
+                    .flatMap(List::stream)
+                    .toList();
+            divisionList.forEach(d -> {
+                if (existingDivisions.contains(d)) {
+                    throw new IllegalStateException("Division already present: " + d.name());
+                }
+            });
+            groups.add(divisionList);
+            return this;
+        }
+
+        public StandardMatchListGenerator build() {
+            return new StandardMatchListGenerator(knockout, Collections.unmodifiableList(groups));
+        }
+    }
+
+    final List<List<Division>> divisionOrdering;
     /**
      * A comparator which sorts entries by the Kings division order. For races this is
      * Mixed -> Ladies -> Board which is fortunately just reverse alphabetical!
@@ -77,15 +121,29 @@ public class StandardMatchListGenerator implements MatchListGenerator {
 
     private final Comparator<Map.Entry<Division, ?>> comparator;
 
-    public StandardMatchListGenerator(final boolean knockout) {
+    public StandardMatchListGenerator(final boolean knockout, List<List<Division>> divisionOrdering) {
         this.comparator = knockout ? KNOCKOUT_DIVISION_COMPARATOR : DIVISION_COMPARATOR;
+        this.divisionOrdering = divisionOrdering;
     }
 
     @Override
     public List<MetaMatch> generate(Round set) {
         final var league = set.league();
+
+        final var divisions = set.subRounds().stream()
+                .collect(Collectors.toMap(
+                        d -> d.division().orElse(Division.NONE),
+                        Function.identity()));
+
+        return divisionOrdering.stream()
+                .map(g -> partitionedMatchList(g.stream().map(divisions::get).toList(), league))
+                .flatMap(List::stream)
+                .toList();
+    }
+
+    public List<MetaMatch> partitionedMatchList(List<Round> divisions, League league) {
         final List<Map<Division, List<MetaMatch>>> partitions = new ArrayList<>();
-        set.subRounds().forEach(setDivision -> {
+        divisions.forEach(setDivision -> {
             final var division = setDivision.division().orElse(Division.NONE);
             setDivision.subRounds().forEach(group -> {
                 final var groupName = group.name();
@@ -100,7 +158,7 @@ public class StandardMatchListGenerator implements MatchListGenerator {
                         }
                         mms.addAll(partition.matches().stream()
                                 .map(m -> new MetaMatch(league, division, groupName, m))
-                                .collect(Collectors.toList()));
+                                .toList());
                         return mms;
                     });
                 }

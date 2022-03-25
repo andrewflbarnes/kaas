@@ -181,7 +181,10 @@ class SmokeTest {
 //        }));
 
         // check list generation
-        final var matchListGenerator = new StandardMatchListGenerator(false);
+        final var matchListGenerator = StandardMatchListGenerator.newBuilder()
+                .withGroup(division1)
+                .withGroup(division2)
+                .build();
         final var matchList = matchListGenerator.generate(set1);
         assertEquals(24, matchList.size());
 
@@ -294,7 +297,11 @@ class SmokeTest {
 
         // TODO asserts
 
-        final var knockoutMatchListGenerator = new StandardMatchListGenerator(true);
+        final var knockoutMatchListGenerator = StandardMatchListGenerator.newBuilder()
+                .asKnockout()
+                .withGroup(division2)
+                .withGroup(division1)
+                .build();
         final var matchList3 = knockoutMatchListGenerator.generate(set3);
         assertEquals(8, matchList3.size());
 
