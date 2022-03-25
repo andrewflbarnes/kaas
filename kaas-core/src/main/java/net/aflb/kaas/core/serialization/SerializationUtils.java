@@ -64,6 +64,14 @@ public class SerializationUtils {
         return om;
     }
 
+    public static ObjectMapper humanNormalisedMapper() {
+        final var om = baseMapper();
+        final var mod = humanModule();
+        om.registerModule(mod);
+
+        return om;
+    }
+
     private static ObjectMapper baseMapper() {
         final var om = new ObjectMapper().deactivateDefaultTyping();
 
@@ -91,6 +99,22 @@ public class SerializationUtils {
         sm.addKeySerializer(Match.class, SerializationUtils.keyNormalizer(m -> m.getId().id()));
         sm.addKeySerializer(Round.class, SerializationUtils.keyNormalizer(r -> r.id().id()));
         sm.addKeySerializer(League.class, SerializationUtils.keyNormalizer(l -> l.id().id()));
+
+        return sm;
+    }
+
+    private static SimpleModule humanModule() {
+        final var sm = new SimpleModule();
+
+        sm.addKeySerializer(Team.class, SerializationUtils.keyNormalizer(Team::name));
+        sm.addSerializer(Team.class, SerializationUtils.normalizer(Team::name));
+        sm.addKeySerializer(Club.class, SerializationUtils.keyNormalizer(Club::name));
+        sm.addSerializer(Club.class, SerializationUtils.normalizer(Club::name));
+        sm.addKeySerializer(Division.class, SerializationUtils.keyNormalizer(Division::name));
+        sm.addSerializer(Division.class, SerializationUtils.normalizer(Division::name));
+        sm.addKeySerializer(Match.class, SerializationUtils.keyNormalizer(m -> m.getId().id()));
+        sm.addKeySerializer(Round.class, SerializationUtils.keyNormalizer(Round::name));
+        sm.addSerializer(League.class, SerializationUtils.normalizer(League::name));
 
         return sm;
     }

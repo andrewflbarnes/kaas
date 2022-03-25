@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -340,13 +339,21 @@ class SmokeTest {
         final var roundNormaliser = SerializationUtils.normalisedRoundMapper();
         final var matchNormaliser = SerializationUtils.normalisedMatchMapper();
         final var normaliser = SerializationUtils.normalisedMapper();
+        final var humanNormaliser = SerializationUtils.humanNormalisedMapper();
 
-        logEntities(roundNormaliser, List.of(round));
-        logEntities(normaliser, registry.getLeagues());
-        logEntities(normaliser, registry.getDivisions());
-        logEntities(normaliser, registry.getTeams());
-        logEntities(normaliser, registry.getClubs());
-        logEntities(matchNormaliser, round.matches());
+        logEntities(humanNormaliser, List.of(round));
+//        logEntities(roundNormaliser, List.of(round));
+//        logEntities(normaliser, registry.getLeagues());
+//        logEntities(normaliser, registry.getDivisions());
+//        logEntities(normaliser, registry.getTeams());
+//        logEntities(normaliser, registry.getClubs());
+//        logEntities(matchNormaliser, round.matches());
+//
+//        try {
+//            log.info("{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(round));
+//        } catch (JsonProcessingException e) {
+//            throw new IllegalStateException("Could not serialise JSON", e);
+//        }
     }
 
     private void logEntities(final ObjectMapper mapper, final Collection<?> items) {

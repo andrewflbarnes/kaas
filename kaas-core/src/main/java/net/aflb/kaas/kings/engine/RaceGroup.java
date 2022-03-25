@@ -119,7 +119,7 @@ public class RaceGroup {
 
 				partitionRaces.add(race);
 
-				log.debug("race added for division {division}, teams {} {}",
+				log.debug("race added for teams {} {}",
 						race.getTeamOne().name(),
 						race.getTeamTwo().name());
 			}
